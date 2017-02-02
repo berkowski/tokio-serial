@@ -1,0 +1,18 @@
+[package]
+name = "tokio-serial"
+version = "0.1.0"
+authors = ["Zac Berkowitz <zac.berkowitz@gmail.com>"]
+description = "A serial port implementation for tokio"
+license = "MIT"
+homepage = "https://github.com/berkowski/tokio-serial"
+repository = "https://github.com/berkowski/tokio-serial"
+documentation = "http://docs.rs/tokio-serial"
+readme = "README.md"
+keywords = ["rs232", "serial", "tokio"]
+categories = ["asynchronous", "hardware-support"]
+
+[dependencies]
+futures = "0.1"
+tokio-core = "0.1"
+mio = "0.6"
+mio-serial = "0.2"
