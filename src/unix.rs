@@ -48,6 +48,44 @@ impl Serial {
         self.io.poll_write()
     }
 
+    /// Create a pair of pseudo serial terminals
+    ///
+    /// ## Returns
+    /// Two connected, unnamed `Serial` objects.
+    ///
+    /// ## Errors
+    /// Attempting any IO or parameter settings on the slave tty after the master 
+    /// tty is closed will return errors.
+    /// 
+    pub fn pair(handle: &Handle) -> ::SerialResult<(Self, Self)> {
+        let (master, slave) = mio_serial::Serial::pair()?;
+
+        let master = Serial { io: PollEvented::new(master, handle)? };
+        let slave  = Serial { io: PollEvented::new(slave, handle)? };
+        Ok((master, slave))
+    }
+
+    /// Sets the exclusivity of the port
+    ///
+    /// If a port is exclusive, then trying to open the same device path again
+    /// will fail.
+    ///
+    /// See the man pages for the tiocexcl and tiocnxcl ioctl's for more details.
+    ///
+    /// ## Errors
+    ///
+    /// * `Io` for any error while setting exclusivity for the port.
+    pub fn set_exclusive(&mut self, exclusive: bool) -> ::SerialResult<()> {
+        self.io.get_mut().set_exclusive(exclusive)
+    }
+
+    /// Returns the exclusivity of the port
+    ///
+    /// If a port is exclusive, then trying to open the same device path again
+    /// will fail.
+    pub fn exclusive(&self) -> bool {
+        self.io.get_ref().exclusive()
+    }
 }
 
 impl ::SerialPort for Serial {
@@ -55,6 +93,11 @@ impl ::SerialPort for Serial {
     /// Returns a struct with the current port settings
     fn settings(&self) -> ::SerialPortSettings {
         self.io.get_ref().settings()
+    }
+
+    /// Return the name associated with the serial port, if known.
+    fn port_name(&self) -> Option<String> {
+        self.io.get_ref().port_name()
     }
 
     /// Returns the current baud rate.

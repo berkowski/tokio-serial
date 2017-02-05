@@ -2,7 +2,7 @@ extern crate futures;
 extern crate tokio_serial;
 extern crate tokio_core;
 
-use std::{io, str};
+use std::{io, env, str};
 use tokio_core::io::{Io, Codec, EasyBuf};
 use tokio_core::reactor::Core;
 use futures::{future, Future, Stream, Sink};
@@ -39,11 +39,15 @@ struct Printer {
 
 fn main() {
 
+    let mut args = env::args();
+    let tty_path = args.nth(1).unwrap_or("/dev/ttyUSB0".into());
+
     let mut core = Core::new().unwrap();
     let handle = core.handle();
 
     let settings = tokio_serial::SerialPortSettings::default();
-    let port = tokio_serial::Serial::from_path("/dev/ttyUSB0", &settings, &handle).unwrap();
+    let mut port = tokio_serial::Serial::from_path(tty_path, &settings, &handle).unwrap();
+    port.set_exclusive(false).expect("Unable to set serial port exlusive");
 
     let (_, reader) = port.framed(LineCodec).split();
 
@@ -53,6 +57,6 @@ fn main() {
     });
     
 
-    core.run(gga).unwrap();
+    core.run(printer).unwrap();
 
 }
