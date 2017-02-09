@@ -16,11 +16,11 @@ impl Codec for LineCodec {
     fn decode(&mut self, buf: &mut EasyBuf) -> io::Result<Option<Self::In>> {
         let newline = buf.as_ref().iter().position(|b| *b == b'\n');
         if let Some(n) = newline {
-            let line = buf.drain_to(n+1);
+            let line = buf.drain_to(n + 1);
             return match str::from_utf8(&line.as_ref()) {
                 Ok(s) => Ok(Some(s.to_string())),
                 Err(_) => Err(io::Error::new(io::ErrorKind::Other, "Invalid String")),
-            }
+            };
         }
         Ok(None)
     }
@@ -55,7 +55,7 @@ fn main() {
         println!("{:?}", s);
         Ok(())
     });
-    
+
 
     core.run(printer).unwrap();
 
