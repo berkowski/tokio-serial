@@ -12,10 +12,10 @@
 #![cfg(unix)]
 #![deny(missing_docs)]
 
-#[macro_use]
 extern crate futures;
-#[macro_use]
 extern crate tokio_core;
+extern crate tokio_io;
+extern crate bytes;
 
 extern crate mio;
 extern crate mio_serial;
