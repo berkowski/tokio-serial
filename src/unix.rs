@@ -11,18 +11,22 @@ use mio_serial;
 
 /// Serial port I/O struct.
 pub struct Serial {
-    io:  PollEvented<mio_serial::Serial>
+    io: PollEvented<mio_serial::Serial>,
 }
 
 impl Serial {
     /// Open serial port from a provided path.
-    pub fn from_path<P>(path: P, settings: &mio_serial::SerialPortSettings, handle: &Handle) -> io::Result<Serial>
-            where P: AsRef<Path> {
+    pub fn from_path<P>(path: P,
+                        settings: &mio_serial::SerialPortSettings,
+                        handle: &Handle)
+                        -> io::Result<Serial>
+        where P: AsRef<Path>
+    {
 
         let port = mio_serial::Serial::from_path(path.as_ref(), settings)?;
         let io = PollEvented::new(port, handle)?;
 
-        Ok(Serial{io: io})
+        Ok(Serial { io: io })
     }
 
     /// Test whether this serial port is ready to be read or not.
@@ -44,13 +48,56 @@ impl Serial {
     pub fn poll_write(&self) -> Async<()> {
         self.io.poll_write()
     }
+
+    /// Create a pair of pseudo serial terminals
+    ///
+    /// ## Returns
+    /// Two connected, unnamed `Serial` objects.
+    ///
+    /// ## Errors
+    /// Attempting any IO or parameter settings on the slave tty after the master
+    /// tty is closed will return errors.
+    ///
+    pub fn pair(handle: &Handle) -> ::SerialResult<(Self, Self)> {
+        let (master, slave) = mio_serial::Serial::pair()?;
+
+        let master = Serial { io: PollEvented::new(master, handle)? };
+        let slave = Serial { io: PollEvented::new(slave, handle)? };
+        Ok((master, slave))
+    }
+
+    /// Sets the exclusivity of the port
+    ///
+    /// If a port is exclusive, then trying to open the same device path again
+    /// will fail.
+    ///
+    /// See the man pages for the tiocexcl and tiocnxcl ioctl's for more details.
+    ///
+    /// ## Errors
+    ///
+    /// * `Io` for any error while setting exclusivity for the port.
+    pub fn set_exclusive(&mut self, exclusive: bool) -> ::SerialResult<()> {
+        self.io.get_mut().set_exclusive(exclusive)
+    }
+
+    /// Returns the exclusivity of the port
+    ///
+    /// If a port is exclusive, then trying to open the same device path again
+    /// will fail.
+    pub fn exclusive(&self) -> bool {
+        self.io.get_ref().exclusive()
+    }
 }
 
 impl ::SerialPort for Serial {
-
     /// Returns a struct with the current port settings
     fn settings(&self) -> ::SerialPortSettings {
         self.io.get_ref().settings()
+    }
+
+    /// Return the name associated with the serial port, if known.
+    fn port_name(&self) -> Option<String> {
+        self.io.get_ref().port_name()
     }
 
     /// Returns the current baud rate.
@@ -245,7 +292,6 @@ impl ::SerialPort for Serial {
     fn read_carrier_detect(&mut self) -> ::SerialResult<bool> {
         self.io.get_mut().read_carrier_detect()
     }
-
 }
 
 impl Read for Serial {

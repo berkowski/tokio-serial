@@ -21,16 +21,8 @@ extern crate mio;
 extern crate mio_serial;
 
 // Re-export serialport types and traits from mio_serial
-pub use mio_serial::{
-    BaudRate,
-    DataBits,
-    StopBits,
-    FlowControl,
-    Parity,
-    SerialPort,
-    SerialPortSettings,
-    SerialResult,
-};
+pub use mio_serial::{BaudRate, DataBits, StopBits, FlowControl, Parity, SerialPort,
+                     SerialPortSettings, SerialResult};
 
 #[cfg(unix)]
 pub use unix::Serial;

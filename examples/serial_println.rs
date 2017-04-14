@@ -4,7 +4,8 @@ extern crate tokio_core;
 extern crate tokio_io;
 extern crate bytes;
 
-use std::{io, str};
+
+use std::{io, env, str};
 use tokio_core::reactor::Core;
 
 use tokio_io::codec::{Decoder, Encoder};
@@ -22,11 +23,11 @@ impl Decoder for LineCodec {
     fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         let newline = src.as_ref().iter().position(|b| *b == b'\n');
         if let Some(n) = newline {
-            let line = src.split_to(n+1);
+            let line = buf.drain_to(n + 1);
             return match str::from_utf8(&line.as_ref()) {
                 Ok(s) => Ok(Some(s.to_string())),
                 Err(_) => Err(io::Error::new(io::ErrorKind::Other, "Invalid String")),
-            }
+            };
         }
         Ok(None)
     }
@@ -42,13 +43,15 @@ impl Encoder for LineCodec {
 }
 
 fn main() {
+    let mut args = env::args();
+    let tty_path = args.nth(1).unwrap_or("/dev/ttyUSB0".into());
+
     let mut core = Core::new().unwrap();
     let handle = core.handle();
 
-    let mut settings = tokio_serial::SerialPortSettings::default();
-    settings.baud_rate = tokio_serial::BaudRate::Baud115200;
-
-    let port = tokio_serial::Serial::from_path("/dev/ttyUSB0", &settings, &handle).unwrap();
+    let settings = tokio_serial::SerialPortSettings::default();
+    let mut port = tokio_serial::Serial::from_path(tty_path, &settings, &handle).unwrap();
+    port.set_exclusive(false).expect("Unable to set serial port exlusive");
 
     let (_, reader) = port.framed(LineCodec).split();
 
@@ -56,6 +59,6 @@ fn main() {
         println!("{:?}", s);
         Ok(())
     });
-    
+
     core.run(printer).unwrap();
 }
