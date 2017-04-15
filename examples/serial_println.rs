@@ -23,7 +23,7 @@ impl Decoder for LineCodec {
     fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         let newline = src.as_ref().iter().position(|b| *b == b'\n');
         if let Some(n) = newline {
-            let line = buf.drain_to(n + 1);
+            let line = src.split_to(n + 1);
             return match str::from_utf8(&line.as_ref()) {
                 Ok(s) => Ok(Some(s.to_string())),
                 Err(_) => Err(io::Error::new(io::ErrorKind::Other, "Invalid String")),

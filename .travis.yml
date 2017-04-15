@@ -13,6 +13,7 @@ rust: stable
 env:
   global:
     - CRATE_NAME=tokio-serial
+    - PKG_CONFIG_ALLOW_CROSS=1
     - RUST_BACKTRACE=1
 
     # default job

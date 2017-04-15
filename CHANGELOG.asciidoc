@@ -8,7 +8,10 @@ and this project adheres to http://semver.org/[Semantic Versioning].
 === [Unreleased]
 ==== added
 * Added `trust` CI
+* [#1](https://github.com/berkowski/tokio-serial/pull/1) Added `tokio-io` as a dependency.
+  Thanks [lexxvir](https://github.com/lexxvir)!
 
 ==== changed
 * Bumped `mio-serial` dependency to 0.5  Future releases will
   track `mio-serial` versions.
+
