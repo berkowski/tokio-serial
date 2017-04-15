@@ -1,8 +1,8 @@
-use futures::Async;
+use futures::{Async, Poll};
 use tokio_core::reactor::{PollEvented, Handle};
-use tokio_core::io::Io;
+use tokio_io::{AsyncRead, AsyncWrite};
 
-use std::io::{self, Read, Write};
+use std::io::{self, Read, Write, Error};
 use std::path::Path;
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::time::Duration;
@@ -13,7 +13,6 @@ use mio_serial;
 pub struct Serial {
     io: PollEvented<mio_serial::Serial>,
 }
-
 
 impl Serial {
     /// Open serial port from a provided path.
@@ -29,7 +28,6 @@ impl Serial {
 
         Ok(Serial { io: io })
     }
-
 
     /// Test whether this serial port is ready to be read or not.
     ///
@@ -312,16 +310,6 @@ impl Write for Serial {
     }
 }
 
-impl Io for Serial {
-    fn poll_read(&mut self) -> Async<()> {
-        <Serial>::poll_read(self)
-    }
-
-    fn poll_write(&mut self) -> Async<()> {
-        <Serial>::poll_write(self)
-    }
-}
-
 impl<'a> Read for &'a Serial {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         (&self.io).read(buf)
@@ -338,18 +326,17 @@ impl<'a> Write for &'a Serial {
     }
 }
 
-impl<'a> Io for &'a Serial {
-    fn poll_read(&mut self) -> Async<()> {
-        <Serial>::poll_read(self)
-    }
-
-    fn poll_write(&mut self) -> Async<()> {
-        <Serial>::poll_write(self)
-    }
-}
-
 impl AsRawFd for Serial {
     fn as_raw_fd(&self) -> RawFd {
         self.io.get_ref().as_raw_fd()
+    }
+}
+
+impl AsyncRead for Serial {
+}
+
+impl AsyncWrite for Serial {
+    fn shutdown(&mut self) -> Poll<(), Error> {
+        Ok(Async::Ready(()))
     }
 }

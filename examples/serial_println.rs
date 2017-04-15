@@ -1,20 +1,27 @@
 extern crate futures;
 extern crate tokio_serial;
 extern crate tokio_core;
+extern crate tokio_io;
+extern crate bytes;
+
 
 use std::{io, env, str};
-use tokio_core::io::{Io, Codec, EasyBuf};
 use tokio_core::reactor::Core;
-use futures::{future, Future, Stream, Sink};
+
+use tokio_io::codec::{Decoder, Encoder};
+use tokio_io::AsyncRead;
+use bytes::BytesMut;
+
+use futures::{Stream};
 
 struct LineCodec;
 
-impl Codec for LineCodec {
-    type In = String;
-    type Out = String;
+impl Decoder for LineCodec {
+    type Item = String;
+    type Error = io::Error;
 
-    fn decode(&mut self, buf: &mut EasyBuf) -> io::Result<Option<Self::In>> {
-        let newline = buf.as_ref().iter().position(|b| *b == b'\n');
+    fn decode(&mut self, src: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
+        let newline = src.as_ref().iter().position(|b| *b == b'\n');
         if let Some(n) = newline {
             let line = buf.drain_to(n + 1);
             return match str::from_utf8(&line.as_ref()) {
@@ -24,21 +31,18 @@ impl Codec for LineCodec {
         }
         Ok(None)
     }
+}
 
-    // Don't actually encode anything.
-    fn encode(&mut self, msg: Self::Out, buf: &mut Vec<u8>) -> io::Result<()> {
+impl Encoder for LineCodec {
+    type Item = String;
+    type Error = io::Error;
+
+    fn encode(&mut self, _item: Self::Item, _dst: &mut BytesMut) -> Result<(), Self::Error> {
         Ok(())
     }
 }
 
-struct Printer {
-    serial: tokio_serial::Serial,
-    buf: Vec<u8>,
-}
-
-
 fn main() {
-
     let mut args = env::args();
     let tty_path = args.nth(1).unwrap_or("/dev/ttyUSB0".into());
 
@@ -56,7 +60,5 @@ fn main() {
         Ok(())
     });
 
-
     core.run(printer).unwrap();
-
 }
