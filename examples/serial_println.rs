@@ -12,7 +12,7 @@ use tokio_io::codec::{Decoder, Encoder};
 use tokio_io::AsyncRead;
 use bytes::BytesMut;
 
-use futures::{Stream};
+use futures::Stream;
 
 struct LineCodec;
 
@@ -24,10 +24,10 @@ impl Decoder for LineCodec {
         let newline = src.as_ref().iter().position(|b| *b == b'\n');
         if let Some(n) = newline {
             let line = src.split_to(n + 1);
-            return match str::from_utf8(&line.as_ref()) {
-                Ok(s) => Ok(Some(s.to_string())),
-                Err(_) => Err(io::Error::new(io::ErrorKind::Other, "Invalid String")),
-            };
+            return match str::from_utf8(line.as_ref()) {
+                       Ok(s) => Ok(Some(s.to_string())),
+                       Err(_) => Err(io::Error::new(io::ErrorKind::Other, "Invalid String")),
+                   };
         }
         Ok(None)
     }
@@ -44,21 +44,22 @@ impl Encoder for LineCodec {
 
 fn main() {
     let mut args = env::args();
-    let tty_path = args.nth(1).unwrap_or("/dev/ttyUSB0".into());
+    let tty_path = args.nth(1).unwrap_or_else(|| "/dev/ttyUSB0".into());
 
     let mut core = Core::new().unwrap();
     let handle = core.handle();
 
     let settings = tokio_serial::SerialPortSettings::default();
     let mut port = tokio_serial::Serial::from_path(tty_path, &settings, &handle).unwrap();
-    port.set_exclusive(false).expect("Unable to set serial port exlusive");
+    port.set_exclusive(false)
+        .expect("Unable to set serial port exlusive");
 
     let (_, reader) = port.framed(LineCodec).split();
 
     let printer = reader.for_each(|s| {
-        println!("{:?}", s);
-        Ok(())
-    });
+                                      println!("{:?}", s);
+                                      Ok(())
+                                  });
 
     core.run(printer).unwrap();
 }

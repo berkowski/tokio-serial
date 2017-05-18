@@ -332,8 +332,7 @@ impl AsRawFd for Serial {
     }
 }
 
-impl AsyncRead for Serial {
-}
+impl AsyncRead for Serial {}
 
 impl AsyncWrite for Serial {
     fn shutdown(&mut self) -> Poll<(), Error> {
