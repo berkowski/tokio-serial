@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
-=== [Unreleased]
+=== [0.5.0] - 2017-05-18
 ==== added
 * Added `trust` CI
-* https://github.com/berkowski/tokio-serial/pull/1[#1] Added `tokio-io` as a dependency.
-  Thanks https://github.com/lexxvir[lexxvir]!
+* https://github.com/berkowski/tokio-serial/pull/1[#1] provided `AsyncRead` and
+  `AsyncWrite` impls.  Thanks https://github.com/lexxvir[lexxvir]!
 
 ==== changed
 * Bumped `mio-serial` dependency to 0.5  Future releases will
