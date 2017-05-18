@@ -38,7 +38,6 @@ matrix:
     # *BSD
     - env: TARGET=i686-unknown-freebsd DISABLE_TESTS=1
     - env: TARGET=x86_64-unknown-freebsd DISABLE_TESTS=1
-    - env: TARGET=x86_64-unknown-netbsd DISABLE_TESTS=1
 
     # Other architectures
     - env: TARGET=aarch64-unknown-linux-gnu DISABLE_TESTS=1
@@ -67,6 +66,12 @@ matrix:
     - env: TARGET=x86_64-apple-darwin
       os: osx
       rust: nightly
+
+  # Allowed failures:
+  allow_failures:
+    # netbsd is failing due to build issues with dependant crates
+    - env: TARGET=x86_64-unknown-netbsd DISABLE_TESTS=1
+
 
 install:
   - sh ci/install.sh
