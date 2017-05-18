@@ -23,8 +23,11 @@ main() {
            --target $target
 
     # Build custom linux docker images
-    if [ $TARGET != ${TARGET#*linux} ]; then
-	docker build -t mio-serial/$TARGET ci/docker/$TARGET
+    # if [ $TARGET != ${TARGET#*linux} ]; then
+    # Build custom linux containers
+    if [ -z "${TARGET##*linux*}" ]
+    then
+	docker build -t tokio-serial/$TARGET ci/docker/$TARGET
     fi
 }
 
