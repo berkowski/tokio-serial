@@ -56,6 +56,7 @@ fn main() {
 
     let settings = tokio_serial::SerialPortSettings::default();
     let mut port = tokio_serial::Serial::from_path(tty_path, &settings, &handle).unwrap();
+    #[cfg(unix)]
     port.set_exclusive(false)
         .expect("Unable to set serial port exlusive");
 
