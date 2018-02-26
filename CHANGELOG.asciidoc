@@ -6,7 +6,6 @@ The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
 === [0.6.0] - 2017-11-28
-
 ==== added
 * Re-exporting `mio_serial::Error` (itself a re-export of `serialport::Error`)
 

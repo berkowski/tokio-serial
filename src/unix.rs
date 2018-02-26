@@ -58,7 +58,7 @@ impl Serial {
     /// Attempting any IO or parameter settings on the slave tty after the master
     /// tty is closed will return errors.
     ///
-    pub fn pair(handle: &Handle) -> ::SerialResult<(Self, Self)> {
+    pub fn pair(handle: &Handle) -> ::Result<(Self, Self)> {
         let (master, slave) = mio_serial::Serial::pair()?;
 
         let master = Serial { io: PollEvented::new(master, handle)? };
@@ -76,7 +76,7 @@ impl Serial {
     /// ## Errors
     ///
     /// * `Io` for any error while setting exclusivity for the port.
-    pub fn set_exclusive(&mut self, exclusive: bool) -> ::SerialResult<()> {
+    pub fn set_exclusive(&mut self, exclusive: bool) -> ::Result<()> {
         self.io.get_mut().set_exclusive(exclusive)
     }
 
@@ -158,7 +158,7 @@ impl ::SerialPort for Serial {
     /// Applies all settings for a struct. This isn't guaranteed to involve only
     /// a single call into the driver, though that may be done on some
     /// platforms.
-    fn set_all(&mut self, settings: &::SerialPortSettings) -> ::SerialResult<()> {
+    fn set_all(&mut self, settings: &::SerialPortSettings) -> ::Result<()> {
         self.io.get_mut().set_all(settings)
     }
 
@@ -169,33 +169,33 @@ impl ::SerialPort for Serial {
     /// If the implementation does not support the requested baud rate, this function may return an
     /// `InvalidInput` error. Even if the baud rate is accepted by `set_baud_rate()`, it may not be
     /// supported by the underlying hardware.
-    fn set_baud_rate(&mut self, baud_rate: ::BaudRate) -> ::SerialResult<()> {
+    fn set_baud_rate(&mut self, baud_rate: ::BaudRate) -> ::Result<()> {
         self.io.get_mut().set_baud_rate(baud_rate)
     }
 
     /// Sets the character size.
-    fn set_data_bits(&mut self, data_bits: ::DataBits) -> ::SerialResult<()> {
+    fn set_data_bits(&mut self, data_bits: ::DataBits) -> ::Result<()> {
         self.io.get_mut().set_data_bits(data_bits)
     }
 
     /// Sets the flow control mode.
-    fn set_flow_control(&mut self, flow_control: ::FlowControl) -> ::SerialResult<()> {
+    fn set_flow_control(&mut self, flow_control: ::FlowControl) -> ::Result<()> {
         self.io.get_mut().set_flow_control(flow_control)
     }
 
     /// Sets the parity-checking mode.
-    fn set_parity(&mut self, parity: ::Parity) -> ::SerialResult<()> {
+    fn set_parity(&mut self, parity: ::Parity) -> ::Result<()> {
         self.io.get_mut().set_parity(parity)
     }
 
     /// Sets the number of stop bits.
-    fn set_stop_bits(&mut self, stop_bits: ::StopBits) -> ::SerialResult<()> {
+    fn set_stop_bits(&mut self, stop_bits: ::StopBits) -> ::Result<()> {
         self.io.get_mut().set_stop_bits(stop_bits)
     }
 
     /// Sets the timeout for future I/O operations.  This parameter is ignored but
     /// required for trait completeness.
-    fn set_timeout(&mut self, _: Duration) -> ::SerialResult<()> {
+    fn set_timeout(&mut self, _: Duration) -> ::Result<()> {
         Ok(())
     }
 
@@ -212,7 +212,7 @@ impl ::SerialPort for Serial {
     ///
     /// * `NoDevice` if the device was disconnected.
     /// * `Io` for any other type of I/O error.
-    fn write_request_to_send(&mut self, level: bool) -> ::SerialResult<()> {
+    fn write_request_to_send(&mut self, level: bool) -> ::Result<()> {
         self.io.get_mut().write_request_to_send(level)
     }
 
@@ -227,7 +227,7 @@ impl ::SerialPort for Serial {
     ///
     /// * `NoDevice` if the device was disconnected.
     /// * `Io` for any other type of I/O error.
-    fn write_data_terminal_ready(&mut self, level: bool) -> ::SerialResult<()> {
+    fn write_data_terminal_ready(&mut self, level: bool) -> ::Result<()> {
         self.io.get_mut().write_data_terminal_ready(level)
     }
 
@@ -244,7 +244,7 @@ impl ::SerialPort for Serial {
     ///
     /// * `NoDevice` if the device was disconnected.
     /// * `Io` for any other type of I/O error.
-    fn read_clear_to_send(&mut self) -> ::SerialResult<bool> {
+    fn read_clear_to_send(&mut self) -> ::Result<bool> {
         self.io.get_mut().read_clear_to_send()
     }
 
@@ -259,7 +259,7 @@ impl ::SerialPort for Serial {
     ///
     /// * `NoDevice` if the device was disconnected.
     /// * `Io` for any other type of I/O error.
-    fn read_data_set_ready(&mut self) -> ::SerialResult<bool> {
+    fn read_data_set_ready(&mut self) -> ::Result<bool> {
         self.io.get_mut().read_data_set_ready()
     }
 
@@ -274,7 +274,7 @@ impl ::SerialPort for Serial {
     ///
     /// * `NoDevice` if the device was disconnected.
     /// * `Io` for any other type of I/O error.
-    fn read_ring_indicator(&mut self) -> ::SerialResult<bool> {
+    fn read_ring_indicator(&mut self) -> ::Result<bool> {
         self.io.get_mut().read_ring_indicator()
     }
 
@@ -289,7 +289,7 @@ impl ::SerialPort for Serial {
     ///
     /// * `NoDevice` if the device was disconnected.
     /// * `Io` for any other type of I/O error.
-    fn read_carrier_detect(&mut self) -> ::SerialResult<bool> {
+    fn read_carrier_detect(&mut self) -> ::Result<bool> {
         self.io.get_mut().read_carrier_detect()
     }
 }
