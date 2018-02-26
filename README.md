@@ -6,7 +6,6 @@ An implementation of  serialport I/O for Tokio
 [![docs.rs](https://docs.rs/tokio-serial/badge.svg)](https://docs.rs/tokio-serial)
 [![Build Status](https://travis-ci.org/berkowski/tokio-serial.svg?branch=master)](https://travis-ci.org/berkowski/tokio-serial)
 
-**Note:** At the moment this is unix only.  No windows COM port yet.
 
 ## Usage
 
@@ -14,7 +13,7 @@ Add `tokio-serial` to you `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokio-serial = "0.6"
+tokio-serial = "0.7"
 ```
 
 Then add this to your crate root:
