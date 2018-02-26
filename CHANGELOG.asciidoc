@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
-=== UNRELEASED
+=== [0.6.0] - 2017-11-28
+==== added
+* Re-exporting `mio_serial::Error` (itself a re-export of `serialport::Error`)
+
+==== changed
+* Bumped `mio-serial` dependency to 0.6
 
 === [0.5.0] - 2017-05-18
 ==== added

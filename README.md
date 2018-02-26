@@ -14,7 +14,7 @@ Add `tokio-serial` to you `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokio-serial = "0.5"
+tokio-serial = "0.6"
 ```
 
 Then add this to your crate root:
