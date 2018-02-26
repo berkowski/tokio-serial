@@ -318,19 +318,16 @@ impl ::SerialPort for Serial {
 
 impl Read for Serial {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        //self.io.read(buf)
         self.io.get_mut().read(buf)
     }
 }
 
 impl Write for Serial {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        // self.io.write(buf)
         self.io.get_mut().write(buf)
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        // self.io.flush()
         self.io.get_mut().flush()
     }
 }
@@ -370,10 +367,3 @@ impl AsyncWrite for Serial {
         Ok(Async::Ready(()))
     }
 }
-
-// #[cfg(unix)]
-// pub use unix::Serial;
-
-// #[cfg(unix)]
-// mod unix;
-
