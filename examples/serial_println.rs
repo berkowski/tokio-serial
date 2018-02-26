@@ -14,6 +14,11 @@ use bytes::BytesMut;
 
 use futures::Stream;
 
+#[cfg(unix)]
+const DEFAULT_TTY: &str = "/dev/ttyUSB0";
+#[cfg(windows)]
+const DEFAULT_TTY: &str = "COM1";
+
 struct LineCodec;
 
 impl Decoder for LineCodec {
@@ -44,13 +49,14 @@ impl Encoder for LineCodec {
 
 fn main() {
     let mut args = env::args();
-    let tty_path = args.nth(1).unwrap_or_else(|| "/dev/ttyUSB0".into());
+    let tty_path = args.nth(1).unwrap_or_else(|| DEFAULT_TTY.into());
 
     let mut core = Core::new().unwrap();
     let handle = core.handle();
 
     let settings = tokio_serial::SerialPortSettings::default();
     let mut port = tokio_serial::Serial::from_path(tty_path, &settings, &handle).unwrap();
+    #[cfg(unix)]
     port.set_exclusive(false)
         .expect("Unable to set serial port exlusive");
 
