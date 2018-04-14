@@ -21,7 +21,7 @@ pub type Result<T> = mio_serial::Result<T>;
 
 use futures::{Async, Poll};
 use tokio::io::{AsyncRead, AsyncWrite};
-use tokio::reactor::PollEvented2;
+use tokio::reactor::{Handle, PollEvented2};
 
 use std::io::{self, Read, Write};
 use std::path::Path;
@@ -33,13 +33,28 @@ pub struct Serial {
 }
 
 impl Serial {
-    /// Open serial port from a provided path.
+    /// Open serial port from a provided path, using the default reactor.
     pub fn from_path<P>(path: P, settings: &mio_serial::SerialPortSettings) -> io::Result<Serial>
     where
         P: AsRef<Path>,
     {
         let port = mio_serial::Serial::from_path(path.as_ref(), settings)?;
         let io = PollEvented2::new(port);
+
+        Ok(Serial { io })
+    }
+
+    /// Open serial port from a provided path, using the specified reactor.
+    pub fn from_path_with_handle<P>(
+        path: P,
+        settings: &mio_serial::SerialPortSettings,
+        handle: &Handle,
+    ) -> io::Result<Serial>
+    where
+        P: AsRef<Path>,
+    {
+        let port = mio_serial::Serial::from_path(path.as_ref(), settings)?;
+        let io = PollEvented2::new_with_handle(port, handle)?;
 
         Ok(Serial { io })
     }
@@ -64,7 +79,7 @@ impl Serial {
         Ok(self.io.poll_write(buf)?)
     }
 
-    /// Create a pair of pseudo serial terminals
+    /// Create a pair of pseudo serial terminals using the default reactor
     ///
     /// ## Returns
     /// Two connected, unnamed `Serial` objects.
@@ -82,6 +97,28 @@ impl Serial {
         };
         let slave = Serial {
             io: PollEvented2::new(slave),
+        };
+        Ok((master, slave))
+    }
+
+    /// Create a pair of pseudo serial terminals using the specified reactor.
+    ///
+    /// ## Returns
+    /// Two connected, unnamed `Serial` objects.
+    ///
+    /// ## Errors
+    /// Attempting any IO or parameter settings on the slave tty after the master
+    /// tty is closed will return errors.
+    ///
+    #[cfg(unix)]
+    pub fn pair_with_handle(handle: &Handle) -> ::Result<(Self, Self)> {
+        let (master, slave) = mio_serial::Serial::pair()?;
+
+        let master = Serial {
+            io: PollEvented2::new_with_handle(master, handle)?,
+        };
+        let slave = Serial {
+            io: PollEvented2::new_with_handle(slave, handle)?,
         };
         Ok((master, slave))
     }
