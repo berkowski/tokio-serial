@@ -8,8 +8,7 @@
 
 extern crate bytes;
 extern crate futures;
-extern crate tokio_core;
-extern crate tokio_io;
+extern crate tokio;
 
 extern crate mio_serial;
 
@@ -21,8 +20,8 @@ pub use mio_serial::{BaudRate, DataBits, Error, ErrorKind, FlowControl, Parity, 
 pub type Result<T> = mio_serial::Result<T>;
 
 use futures::{Async, Poll};
-use tokio_core::reactor::{Handle, PollEvented};
-use tokio_io::{AsyncRead, AsyncWrite};
+use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::reactor::PollEvented2;
 
 use std::io::{self, Read, Write};
 use std::path::Path;
@@ -30,23 +29,19 @@ use std::time::Duration;
 
 /// Serial port I/O struct.
 pub struct Serial {
-    io: PollEvented<mio_serial::Serial>,
+    io: PollEvented2<mio_serial::Serial>,
 }
 
 impl Serial {
     /// Open serial port from a provided path.
-    pub fn from_path<P>(
-        path: P,
-        settings: &mio_serial::SerialPortSettings,
-        handle: &Handle,
-    ) -> io::Result<Serial>
+    pub fn from_path<P>(path: P, settings: &mio_serial::SerialPortSettings) -> io::Result<Serial>
     where
         P: AsRef<Path>,
     {
         let port = mio_serial::Serial::from_path(path.as_ref(), settings)?;
-        let io = PollEvented::new(port, handle)?;
+        let io = PollEvented2::new(port);
 
-        Ok(Serial { io: io })
+        Ok(Serial { io })
     }
 
     /// Test whether this serial port is ready to be read or not.
@@ -55,8 +50,8 @@ impl Serial {
     /// get a notification when the socket does become readable. That is, this
     /// is only suitable for calling in a `Future::poll` method and will
     /// automatically handle ensuring a retry once the socket is readable again.
-    pub fn poll_read(&self) -> Async<()> {
-        self.io.poll_read()
+    pub fn poll_read(&mut self, buf: &mut [u8]) -> ::Result<Async<usize>> {
+        Ok(self.io.poll_read(buf)?)
     }
 
     /// Test whether this socket is ready to be written to or not.
@@ -65,8 +60,8 @@ impl Serial {
     /// get a notification when the socket does become writable. That is, this
     /// is only suitable for calling in a `Future::poll` method and will
     /// automatically handle ensuring a retry once the socket is writable again.
-    pub fn poll_write(&self) -> Async<()> {
-        self.io.poll_write()
+    pub fn poll_write(&mut self, buf: &mut [u8]) -> ::Result<Async<usize>> {
+        Ok(self.io.poll_write(buf)?)
     }
 
     /// Create a pair of pseudo serial terminals
@@ -79,14 +74,14 @@ impl Serial {
     /// tty is closed will return errors.
     ///
     #[cfg(unix)]
-    pub fn pair(handle: &Handle) -> ::Result<(Self, Self)> {
+    pub fn pair() -> ::Result<(Self, Self)> {
         let (master, slave) = mio_serial::Serial::pair()?;
 
         let master = Serial {
-            io: PollEvented::new(master, handle)?,
+            io: PollEvented2::new(master),
         };
         let slave = Serial {
-            io: PollEvented::new(slave, handle)?,
+            io: PollEvented2::new(slave),
         };
         Ok((master, slave))
     }
