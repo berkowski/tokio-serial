@@ -240,38 +240,19 @@ impl ::SerialPort for Serial {
 
 impl Read for Serial {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.io.get_mut().read(buf)
+        self.io.read(buf)
     }
 }
 
 impl Write for Serial {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.io.get_mut().write(buf)
+        self.io.write(buf)
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        self.io.get_mut().flush()
+        self.io.flush()
     }
 }
-
-// impl<'a> Read for &'a Serial {
-//     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-//         // (&self.io).read(buf)
-//         self.io.get_mut().read(buf)
-//     }
-// }
-//
-// impl<'a> Write for &'a Serial {
-//     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-//         // (&self.io).write(buf)
-//         self.io.get_mut().write(buf)
-//     }
-//
-//     fn flush(&mut self) -> io::Result<()> {
-//         // (&self.io).flush()
-//         self.io.get_mut().flush()
-//     }
-// }
 
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
