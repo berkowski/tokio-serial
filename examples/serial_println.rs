@@ -1,18 +1,16 @@
-extern crate futures;
-extern crate tokio_serial;
-extern crate tokio_core;
-extern crate tokio_io;
 extern crate bytes;
+extern crate futures;
+extern crate tokio;
+extern crate tokio_io;
+extern crate tokio_serial;
 
-
-use std::{io, env, str};
-use tokio_core::reactor::Core;
-
+use std::{env, io, str};
+use tokio::io::AsyncRead;
 use tokio_io::codec::{Decoder, Encoder};
-use tokio_io::AsyncRead;
+
 use bytes::BytesMut;
 
-use futures::Stream;
+use futures::{Future, Stream};
 
 #[cfg(unix)]
 const DEFAULT_TTY: &str = "/dev/ttyUSB0";
@@ -30,9 +28,9 @@ impl Decoder for LineCodec {
         if let Some(n) = newline {
             let line = src.split_to(n + 1);
             return match str::from_utf8(line.as_ref()) {
-                       Ok(s) => Ok(Some(s.to_string())),
-                       Err(_) => Err(io::Error::new(io::ErrorKind::Other, "Invalid String")),
-                   };
+                Ok(s) => Ok(Some(s.to_string())),
+                Err(_) => Err(io::Error::new(io::ErrorKind::Other, "Invalid String")),
+            };
         }
         Ok(None)
     }
@@ -51,21 +49,20 @@ fn main() {
     let mut args = env::args();
     let tty_path = args.nth(1).unwrap_or_else(|| DEFAULT_TTY.into());
 
-    let mut core = Core::new().unwrap();
-    let handle = core.handle();
-
     let settings = tokio_serial::SerialPortSettings::default();
-    let mut port = tokio_serial::Serial::from_path(tty_path, &settings, &handle).unwrap();
+    let mut port = tokio_serial::Serial::from_path(tty_path, &settings).unwrap();
     #[cfg(unix)]
     port.set_exclusive(false)
         .expect("Unable to set serial port exlusive");
 
     let (_, reader) = port.framed(LineCodec).split();
 
-    let printer = reader.for_each(|s| {
-                                      println!("{:?}", s);
-                                      Ok(())
-                                  });
+    let printer = reader
+        .for_each(|s| {
+            println!("{:?}", s);
+            Ok(())
+        })
+        .map_err(|e| eprintln!("{}", e));
 
-    core.run(printer).unwrap();
+    tokio::run(printer);
 }

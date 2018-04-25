@@ -30,8 +30,6 @@ matrix:
     - env: TARGET=x86_64-unknown-linux-musl
 
     # OSX
-    - env: TARGET=i686-apple-darwin
-      os: osx
     - env: TARGET=x86_64-apple-darwin
       os: osx
 
@@ -73,7 +71,12 @@ matrix:
     # netbsd is failing due to build issues with dependant crates
     - env: TARGET=x86_64-unknown-netbsd DISABLE_TESTS=1
 
-    # Testing nightly channels -- these will break 
+    # TODO: move this back
+    # See https://github.com/dcuddeback/iokit-sys/pull/8
+    - env: TARGET=i686-apple-darwin
+      os: osx
+
+    # Testing nightly channels -- these will break
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: nightly
     - env: TARGET=x86_64-apple-darwin
