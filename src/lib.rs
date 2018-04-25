@@ -59,26 +59,6 @@ impl Serial {
         Ok(Serial { io })
     }
 
-    /// Test whether this serial port is ready to be read or not.
-    ///
-    /// If the serial port is *not* readable then the current task is scheduled to
-    /// get a notification when the socket does become readable. That is, this
-    /// is only suitable for calling in a `Future::poll` method and will
-    /// automatically handle ensuring a retry once the socket is readable again.
-    pub fn poll_read(&mut self, buf: &mut [u8]) -> ::Result<Async<usize>> {
-        Ok(self.io.poll_read(buf)?)
-    }
-
-    /// Test whether this socket is ready to be written to or not.
-    ///
-    /// If the socket is *not* writable then the current task is scheduled to
-    /// get a notification when the socket does become writable. That is, this
-    /// is only suitable for calling in a `Future::poll` method and will
-    /// automatically handle ensuring a retry once the socket is writable again.
-    pub fn poll_write(&mut self, buf: &mut [u8]) -> ::Result<Async<usize>> {
-        Ok(self.io.poll_write(buf)?)
-    }
-
     /// Create a pair of pseudo serial terminals using the default reactor
     ///
     /// ## Returns
@@ -263,9 +243,17 @@ impl AsRawFd for Serial {
     }
 }
 
-impl AsyncRead for Serial {}
+impl AsyncRead for Serial {
+    fn poll_read(&mut self, buf: &mut [u8]) -> io::Result<Async<usize>> {
+        Ok(self.io.poll_read(buf)?)
+    }
+}
 
 impl AsyncWrite for Serial {
+    fn poll_write(&mut self, buf: &[u8]) -> io::Result<Async<usize>> {
+        Ok(self.io.poll_write(buf)?)
+    }
+
     fn shutdown(&mut self) -> Poll<(), io::Error> {
         Ok(Async::Ready(()))
     }
