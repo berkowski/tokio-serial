@@ -1,6 +1,6 @@
 # tokio-serial
 
-An implementation of  serialport I/O for Tokio
+An implementation of  serialport I/O for Tokio, an async framework for rust.
 
 [![crates.io](http://meritbadge.herokuapp.com/tokio-serial)](https://crates.io/crates/tokio-serial)
 [![docs.rs](https://docs.rs/tokio-serial/badge.svg)](https://docs.rs/tokio-serial)
@@ -21,3 +21,8 @@ Then add this to your crate root:
 ```rust
 extern crate tokio_serial;
 ```
+
+## Resources
+
+[tokio.rs](https://tokio.rs)
+[serialport-rs](https://gitlab.com/susurrus/serialport-rs)
