@@ -245,16 +245,17 @@ impl AsRawFd for Serial {
 
 impl AsyncRead for Serial {
     fn poll_read(&mut self, buf: &mut [u8]) -> io::Result<Async<usize>> {
-        Ok(self.io.poll_read(buf)?)
+        self.io.poll_read(buf)
     }
 }
 
 impl AsyncWrite for Serial {
     fn poll_write(&mut self, buf: &[u8]) -> io::Result<Async<usize>> {
-        Ok(self.io.poll_write(buf)?)
+        self.io.poll_write(buf)
     }
 
     fn shutdown(&mut self) -> Poll<(), io::Error> {
-        Ok(Async::Ready(()))
+        self.io.shutdown()
     }
+
 }
