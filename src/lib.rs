@@ -8,7 +8,8 @@
 
 extern crate bytes;
 extern crate futures;
-extern crate tokio;
+extern crate tokio_io;
+extern crate tokio_reactor;
 
 extern crate mio_serial;
 
@@ -20,8 +21,8 @@ pub use mio_serial::{BaudRate, DataBits, Error, ErrorKind, FlowControl, Parity, 
 pub type Result<T> = mio_serial::Result<T>;
 
 use futures::{Async, Poll};
-use tokio::io::{AsyncRead, AsyncWrite};
-use tokio::reactor::{Handle, PollEvented2};
+use tokio_io::{AsyncRead, AsyncWrite};
+use tokio_reactor::{Handle, PollEvented};
 
 use std::io::{self, Read, Write};
 use std::path::Path;
@@ -29,7 +30,7 @@ use std::time::Duration;
 
 /// Serial port I/O struct.
 pub struct Serial {
-    io: PollEvented2<mio_serial::Serial>,
+    io: PollEvented<mio_serial::Serial>,
 }
 
 impl Serial {
@@ -39,7 +40,7 @@ impl Serial {
         P: AsRef<Path>,
     {
         let port = mio_serial::Serial::from_path(path.as_ref(), settings)?;
-        let io = PollEvented2::new(port);
+        let io = PollEvented::new(port);
 
         Ok(Serial { io })
     }
@@ -54,7 +55,7 @@ impl Serial {
         P: AsRef<Path>,
     {
         let port = mio_serial::Serial::from_path(path.as_ref(), settings)?;
-        let io = PollEvented2::new_with_handle(port, handle)?;
+        let io = PollEvented::new_with_handle(port, handle)?;
 
         Ok(Serial { io })
     }
@@ -73,10 +74,10 @@ impl Serial {
         let (master, slave) = mio_serial::Serial::pair()?;
 
         let master = Serial {
-            io: PollEvented2::new(master),
+            io: PollEvented::new(master),
         };
         let slave = Serial {
-            io: PollEvented2::new(slave),
+            io: PollEvented::new(slave),
         };
         Ok((master, slave))
     }
@@ -95,10 +96,10 @@ impl Serial {
         let (master, slave) = mio_serial::Serial::pair()?;
 
         let master = Serial {
-            io: PollEvented2::new_with_handle(master, handle)?,
+            io: PollEvented::new_with_handle(master, handle)?,
         };
         let slave = Serial {
-            io: PollEvented2::new_with_handle(slave, handle)?,
+            io: PollEvented::new_with_handle(slave, handle)?,
         };
         Ok((master, slave))
     }
@@ -257,5 +258,4 @@ impl AsyncWrite for Serial {
     fn shutdown(&mut self) -> Poll<(), io::Error> {
         self.io.shutdown()
     }
-
 }
