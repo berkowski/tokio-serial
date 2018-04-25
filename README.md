@@ -13,7 +13,7 @@ Add `tokio-serial` to you `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokio-serial = "0.7"
+tokio-serial = "0.8"
 ```
 
 Then add this to your crate root:
