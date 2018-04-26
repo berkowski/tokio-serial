@@ -7,7 +7,8 @@ and this project adheres to http://semver.org/[Semantic Versioning].
 
 === unreleased
 ==== changed
-* Migrated to tokio 0.1 with PR[#9](https://github.com/berkowski/tokio-serial/pull/9)  Thanks, @lnicola!
+* Migrated to tokio 0.1 with https://github.com/berkowski/tokio-serial/pull/9[#9] and
+  https://github.com/berkowski/tokio-serial/pull/10[#10] Thanks, https://github.com/lnicola[lnicola]!
 * Bumped `mio-serial` dependency to 0.8
 
 === [0.7.0] - UNRELEASED
@@ -35,4 +36,3 @@ and this project adheres to http://semver.org/[Semantic Versioning].
 ==== changed
 * Bumped `mio-serial` dependency to 0.5  Future releases will
   track `mio-serial` versions.
-
