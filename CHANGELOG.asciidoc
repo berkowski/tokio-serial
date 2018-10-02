@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
-=== unreleased
+=== [3.0.0] - UNRELEASED
+==== changed
+* Bumped `mio-serial` dependency to 3.0
+
+=== [0.8.0] - 2018-04-27
 ==== changed
 * Migrated to tokio 0.1 with https://github.com/berkowski/tokio-serial/pull/9[#9] and
   https://github.com/berkowski/tokio-serial/pull/10[#10] Thanks, https://github.com/lnicola[lnicola]!
