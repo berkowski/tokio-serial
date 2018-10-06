@@ -61,8 +61,7 @@ fn main() {
         .for_each(|s| {
             println!("{:?}", s);
             Ok(())
-        })
-        .map_err(|e| eprintln!("{}", e));
+        }).map_err(|e| eprintln!("{}", e));
 
     tokio::run(printer);
 }
