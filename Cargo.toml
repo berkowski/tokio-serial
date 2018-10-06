@@ -17,7 +17,7 @@ tokio-io = "0.1"
 tokio-reactor = "0.1"
 bytes = "0.4"
 mio = "0.6"
-mio-serial = { git = "https://github.com/berkowski/mio-serial" }
+mio-serial = "3.0"
 
 [dev-dependencies]
 tokio = "0.1"
