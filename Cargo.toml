@@ -1,6 +1,6 @@
 [package]
 name = "tokio-serial"
-version = "3.0.0"
+version = "3.1.0"
 authors = ["Zac Berkowitz <zac.berkowitz@gmail.com>"]
 description = "A serial port implementation for tokio"
 license = "MIT"
@@ -11,13 +11,21 @@ readme = "README.md"
 keywords = ["rs232", "serial", "tokio"]
 categories = ["asynchronous", "hardware-support"]
 
+[badges]
+appveyor = { repository = "berkowski/tokio-serial", service = "github" }
+travis-ci = { repository = "berkowski/tokio-serial", service = "github" }
+
+[features]
+default = ["libudev"]
+libudev = ["mio-serial/libudev"]
+
 [dependencies]
 futures = "0.1"
 tokio-io = "0.1"
 tokio-reactor = "0.1"
 bytes = "0.4"
 mio = "0.6"
-mio-serial = "3.0"
+mio-serial = "=3.1"
 
 [dev-dependencies]
 tokio = "0.1"
