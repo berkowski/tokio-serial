@@ -25,7 +25,7 @@ tokio-io = "0.1"
 tokio-reactor = "0.1"
 bytes = "0.4"
 mio = "0.6"
-mio-serial = "=3.1"
+mio-serial = { version = "=3.1", default-features = false }
 
 [dev-dependencies]
 tokio = "0.1"
