@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
+=== [3.1.1] 2019-01-12
+==== Changed
+* Merged [#16](https://github/berkowski/tokio-serial/pull/16) @yuja fixed feature flags
+
 === [3.1.0] - 2018-11-10
 ==== changed
 * Bumped `mio-serial` dependency to 3.1
