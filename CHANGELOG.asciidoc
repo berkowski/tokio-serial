@@ -5,13 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
+=== [X.X] UNRELEASED
+
+==== changed
+* Merged [#17](https://github.com/berkowski/tokio-serial/pull/17) @nanpuyue updated the printline example.
+
 === [3.2] 2019-01-12
 ==== Changed
 * Bumped [serialport-rs](https://gitlab.com/susurrus/serialport-rs) to 3.2
 
 === [3.1.1] 2019-01-12
 ==== Changed
-* Merged [#16](https://github/berkowski/tokio-serial/pull/16) @yuja fixed feature flags
+* Merged [#16](https://github.com/berkowski/tokio-serial/pull/16) @yuja fixed feature flags
 
 === [3.1.0] - 2018-11-10
 ==== changed
