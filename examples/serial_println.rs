@@ -5,7 +5,6 @@ extern crate tokio_io;
 extern crate tokio_serial;
 
 use std::{env, io, str};
-use tokio::io::AsyncRead;
 use tokio_io::codec::{Decoder, Encoder};
 
 use bytes::BytesMut;
@@ -55,7 +54,7 @@ fn main() {
     port.set_exclusive(false)
         .expect("Unable to set serial port exlusive");
 
-    let (_, reader) = port.framed(LineCodec).split();
+    let (_, reader) = LineCodec.framed(port).split();
 
     let printer = reader
         .for_each(|s| {
