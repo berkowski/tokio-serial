@@ -7,6 +7,10 @@ and this project adheres to http://semver.org/[Semantic Versioning].
 
 === [X.X] UNRELEASED
 
+=== [3.2.14] 2019-06-01
+==== Changed
+* Bumped [mio-serial](https://gitlab.com/berkowski/mio-serial) to 3.2.14 (tracking mio version 0.14)
+
 ==== changed
 * Merged [#17](https://github.com/berkowski/tokio-serial/pull/17) @nanpuyue updated the printline example.
 
