@@ -21,11 +21,11 @@ default = ["libudev"]
 libudev = ["mio-serial/libudev"]
 
 [dependencies]
-tokio-io = {git = "https://github.com/tokio-rs/tokio"}
-tokio-reactor = {git = "https://github.com/tokio-rs/tokio"}
+tokio-io = "0.2.0-alpha.1"
+tokio-reactor = "0.2.0-alpha.1"
 mio-serial = { version = "=3.2.14", default-features = false }
 
 [dev-dependencies]
 bytes = "0.4"
-tokio = {git = "https://github.com/tokio-rs/tokio"}
+tokio = "0.2.0-alpha.1"
 futures-preview = "=0.3.0-alpha.17"
