@@ -3,9 +3,9 @@ extern crate tokio;
 extern crate tokio_io;
 extern crate tokio_serial;
 
+use bytes::BytesMut;
 use std::{env, io, str};
 use tokio::codec::{Decoder, Encoder};
-use bytes::BytesMut;
 
 use tokio::prelude::*;
 
