@@ -1,15 +1,13 @@
 extern crate bytes;
-extern crate futures;
 extern crate tokio;
 extern crate tokio_io;
 extern crate tokio_serial;
 
 use std::{env, io, str};
-use tokio_io::codec::{Decoder, Encoder};
-
+use tokio::codec::{Decoder, Encoder};
 use bytes::BytesMut;
 
-use futures::{Future, Stream};
+use tokio::prelude::*;
 
 #[cfg(unix)]
 const DEFAULT_TTY: &str = "/dev/ttyUSB0";
@@ -54,13 +52,16 @@ fn main() {
     port.set_exclusive(false)
         .expect("Unable to set serial port exlusive");
 
-    let (_, reader) = LineCodec.framed(port).split();
+    let framed = LineCodec.framed(port);
 
-    let printer = reader
-        .for_each(|s| {
-            println!("{:?}", s);
-            Ok(())
-        }).map_err(|e| eprintln!("{}", e));
+    let printer = framed.for_each(|s| {
+        match s {
+            Ok(data) => println!("{:x?}", data),
+            Err(err) => println!("err: {:x?}", err),
+        }
+        tokio::future::ready(())
+    });
 
-    tokio::run(printer);
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(printer);
 }

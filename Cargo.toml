@@ -20,12 +20,11 @@ default = ["libudev"]
 libudev = ["mio-serial/libudev"]
 
 [dependencies]
-futures = "0.1"
-tokio-io = "0.1"
-tokio-reactor = "0.1"
+tokio-io = "=0.2.0-alpha.1"
+tokio-reactor = "=0.2.0-alpha.1"
 bytes = "0.4"
 mio = "0.6"
 mio-serial = { version = "=3.2.14", default-features = false }
 
 [dev-dependencies]
-tokio = "0.1"
+tokio = "=0.2.0-alpha.1"
