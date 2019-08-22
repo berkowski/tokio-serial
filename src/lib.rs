@@ -16,7 +16,7 @@ pub use mio_serial::{
 pub type Result<T> = mio_serial::Result<T>;
 
 use tokio_io::{AsyncRead, AsyncWrite};
-use tokio_reactor::{Handle, PollEvented};
+use tokio_net::{driver::Handle, util::PollEvented};
 
 use std::io::{self, Read, Write};
 use std::path::Path;

@@ -1,4 +1,3 @@
-#![feature(async_await)]
 use std::{env, io, str};
 use tokio::codec::{Decoder, Encoder};
 use bytes::BytesMut;
