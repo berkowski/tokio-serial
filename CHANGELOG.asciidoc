@@ -6,6 +6,9 @@ The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
 === [X.X] UNRELEASED
+* Bumped to tokio dependencies to version 0.2
+  Majority of work done by @12101111 and @will-w in PR's [#19](https://github.com/berkowski/tokio-serial/pull/19)
+  and [#21](https://github.com/berkowski/tokio-serial/pull/21) respectively
 
 === [3.2.14] 2019-06-01
 ==== Changed

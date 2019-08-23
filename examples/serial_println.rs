@@ -1,15 +1,11 @@
-extern crate bytes;
-extern crate futures;
-extern crate tokio;
-extern crate tokio_io;
-extern crate tokio_serial;
+#![warn(rust_2018_idioms)]
 
 use std::{env, io, str};
-use tokio_io::codec::{Decoder, Encoder};
+use tokio::codec::{Decoder, Encoder};
 
 use bytes::BytesMut;
 
-use futures::{Future, Stream};
+use futures::{future, StreamExt, TryStreamExt};
 
 #[cfg(unix)]
 const DEFAULT_TTY: &str = "/dev/ttyUSB0";
@@ -44,7 +40,8 @@ impl Encoder for LineCodec {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let mut args = env::args();
     let tty_path = args.nth(1).unwrap_or_else(|| DEFAULT_TTY.into());
 
@@ -56,11 +53,11 @@ fn main() {
 
     let (_, reader) = LineCodec.framed(port).split();
 
-    let printer = reader
-        .for_each(|s| {
+    reader
+        .try_for_each(|s| {
             println!("{:?}", s);
-            Ok(())
-        }).map_err(|e| eprintln!("{}", e));
-
-    tokio::run(printer);
+            future::ready(Ok(()))
+        })
+        .await
+        .unwrap_or_else(|e| eprintln!("{}", e));
 }
