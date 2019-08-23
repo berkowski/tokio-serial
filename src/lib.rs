@@ -5,6 +5,7 @@
 //! bindings in `mio_serial`
 //!
 #![deny(missing_docs)]
+#![warn(rust_2018_idioms)]
 
 // Re-export serialport types and traits from mio_serial
 pub use mio_serial::{
@@ -255,7 +256,7 @@ impl AsRawFd for Serial {
 impl AsyncRead for Serial {
     fn poll_read(
         self: Pin<&mut Self>,
-        cx: &mut Context,
+        cx: &mut Context <'_>,
         buf: &mut [u8],
     ) -> Poll<io::Result<usize>> {
         Pin::new(&mut self.get_mut().io).poll_read(cx, buf)
@@ -263,15 +264,15 @@ impl AsyncRead for Serial {
 }
 
 impl AsyncWrite for Serial {
-    fn poll_write(self: Pin<&mut Self>, cx: &mut Context, buf: &[u8]) -> Poll<io::Result<usize>> {
+    fn poll_write(self: Pin<&mut Self>, cx: &mut Context <'_>, buf: &[u8]) -> Poll<io::Result<usize>> {
         Pin::new(&mut self.get_mut().io).poll_write(cx, buf)
     }
 
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>> {
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context <'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.get_mut().io).poll_flush(cx)
     }
 
-    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>> {
+    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context <'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.get_mut().io).poll_shutdown(cx)
     }
 }
