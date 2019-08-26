@@ -1,6 +1,6 @@
 [package]
 name = "tokio-serial"
-version = "3.3.0-tokio-0.2.0-alpha.1"
+version = "3.3.0-tokio-0.2.0-alpha.2"
 authors = ["Zac Berkowitz <zac.berkowitz@gmail.com>"]
 description = "A serial port implementation for tokio"
 license = "MIT"
@@ -21,12 +21,12 @@ default = ["libudev"]
 libudev = ["mio-serial/libudev"]
 
 [dependencies]
-tokio-io = "0.2.0-alpha.1"
-tokio-reactor = "0.2.0-alpha.1"
+tokio-io = "0.2.0-alpha.2"
+tokio-net = "0.2.0-alpha.2"
 bytes = "0.4"
 mio = "0.6"
 mio-serial = { version = "=3.3.0", default-features = false }
 
 [dev-dependencies]
-futures-preview = "=0.3.0-alpha.17"
-tokio = "0.2.0-alpha.1"
+futures-preview = "=0.3.0-alpha.18"
+tokio = "0.2.0-alpha.2"
