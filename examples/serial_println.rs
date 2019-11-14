@@ -1,11 +1,11 @@
 #![warn(rust_2018_idioms)]
 
 use std::{env, io, str};
-use tokio::codec::{Decoder, Encoder};
+use tokio_codec::{Decoder, Encoder};
 
 use bytes::BytesMut;
 
-use futures::{future, StreamExt, TryStreamExt};
+use futures_util::try_stream::TryStreamExt;
 
 #[cfg(unix)]
 const DEFAULT_TTY: &str = "/dev/ttyUSB0";
@@ -51,12 +51,12 @@ async fn main() {
     port.set_exclusive(false)
         .expect("Unable to set serial port exlusive");
 
-    let (_, reader) = LineCodec.framed(port).split();
+    let reader = LineCodec.framed(port);
 
     reader
         .try_for_each(|s| {
             println!("{:?}", s);
-            future::ready(Ok(()))
+            futures_util::future::ready(Ok(()))
         })
         .await
         .unwrap_or_else(|e| eprintln!("{}", e));
