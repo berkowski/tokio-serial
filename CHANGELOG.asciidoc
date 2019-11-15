@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
+=== [4.3.3-alpha.6] 2019-11-15
+==== Changed
+* @Darksonn bumped tokio dependencies to version 0.2.0-alpha.6 in PR [#23](https://github.com/berkowski/tokio-serial/pull/23)
+* Updated README.md to include latest tokio-seial version numbers for both tokio 0.1 and 0.2-alpha based libraries.
 
 === [4.3.3-alpha.2] 2019-08-26
 ==== Changed
