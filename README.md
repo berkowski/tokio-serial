@@ -13,8 +13,8 @@ Add `tokio-serial` to you `Cargo.toml`:
 
 ```toml
 [dependencies]
-# For latest version using tokio 0.2 alpha
-tokio-serial = "4.3.3-tokio-0.2.0-alpha.6"
+# For latest version using tokio 0.2
+tokio-serial = "4.3.3"
 
 # For version using tokio 0.1
 tokio-serial = "3.3.0"
