@@ -25,6 +25,7 @@ use std::task::{Context, Poll};
 use std::time::Duration;
 
 /// Serial port I/O struct.
+#[derive(Debug)]
 pub struct Serial {
     io: PollEvented<mio_serial::Serial>,
 }
