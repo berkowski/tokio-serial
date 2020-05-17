@@ -22,7 +22,7 @@ libudev = ["mio-serial/libudev"]
 
 [dependencies]
 tokio = { version = "0.2.0", features = ["io-driver"], default-features = false }
-mio-serial = { version = "3.3.0", default-features = false }
+mio-serial = { version = "3.3.1", default-features = false }
 
 [dev-dependencies]
 futures = "0.3.1"
