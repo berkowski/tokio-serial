@@ -52,10 +52,13 @@ impl Serial {
     ///
     /// ## Examples
     ///
-    /// ```
+    /// ```rust
     /// use tokio_serial::Serial;
     ///
-    /// let (fst, snd) = Serial::pair().unwrap();
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let (fst, snd) = Serial::pair().unwrap();
+    /// }
     /// ```
     #[cfg(unix)]
     pub fn pair() -> Result<(Self, Self)> {
