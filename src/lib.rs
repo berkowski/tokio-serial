@@ -47,9 +47,16 @@ impl Serial {
     /// Two connected, unnamed `Serial` objects.
     ///
     /// ## Errors
-    /// Attempting any IO or parameter settings on the slave tty after the master
+    /// Attempting any IO or parameter settings on the second tty after the first
     /// tty is closed will return errors.
     ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use tokio_serial::Serial;
+    ///
+    /// let (fst, snd) = Serial::pair().unwrap();
+    /// ```
     #[cfg(unix)]
     pub fn pair() -> Result<(Self, Self)> {
         let (master, slave) = mio_serial::Serial::pair()?;
@@ -218,7 +225,7 @@ impl AsRawFd for Serial {
 impl AsyncRead for Serial {
     fn poll_read(
         self: Pin<&mut Self>,
-        cx: &mut Context <'_>,
+        cx: &mut Context<'_>,
         buf: &mut [u8],
     ) -> Poll<io::Result<usize>> {
         Pin::new(&mut self.get_mut().io).poll_read(cx, buf)
@@ -226,15 +233,19 @@ impl AsyncRead for Serial {
 }
 
 impl AsyncWrite for Serial {
-    fn poll_write(self: Pin<&mut Self>, cx: &mut Context <'_>, buf: &[u8]) -> Poll<io::Result<usize>> {
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<io::Result<usize>> {
         Pin::new(&mut self.get_mut().io).poll_write(cx, buf)
     }
 
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context <'_>) -> Poll<io::Result<()>> {
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.get_mut().io).poll_flush(cx)
     }
 
-    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context <'_>) -> Poll<io::Result<()>> {
+    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.get_mut().io).poll_shutdown(cx)
     }
 }
