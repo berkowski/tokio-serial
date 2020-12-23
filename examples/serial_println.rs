@@ -2,7 +2,7 @@
 
 use std::{env, io, str};
 use tokio_util::codec::{Decoder, Encoder};
-use futures::stream::StreamExt;
+use tokio_stream::StreamExt;
 
 use bytes::BytesMut;
 
@@ -30,11 +30,10 @@ impl Decoder for LineCodec {
     }
 }
 
-impl Encoder for LineCodec {
-    type Item = String;
+impl Encoder<String> for LineCodec {
     type Error = io::Error;
 
-    fn encode(&mut self, _item: Self::Item, _dst: &mut BytesMut) -> Result<(), Self::Error> {
+    fn encode(&mut self, _item: String, _dst: &mut BytesMut) -> Result<(), Self::Error> {
         Ok(())
     }
 }
