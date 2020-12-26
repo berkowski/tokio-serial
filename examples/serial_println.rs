@@ -2,7 +2,7 @@
 
 use std::{env, io, str};
 use tokio_util::codec::{Decoder, Encoder};
-use tokio_stream::StreamExt;
+use futures::stream::StreamExt;
 
 use bytes::BytesMut;
 
