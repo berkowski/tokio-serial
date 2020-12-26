@@ -222,15 +222,13 @@ impl AsyncRead for Serial {
         cx: &mut Context<'_>,
         buf: &mut ReadBuf<'_>,
     ) -> Poll<io::Result<()>> {
-        loop {
-            let mut guard = ready!(self.io.poll_read_ready(cx))?;
-            match guard.try_io(|_| {
-                let read = self.io.get_ref().read(buf.initialize_unfilled())?;
-                return Ok(buf.advance(read));
-            }) {
-                Ok(result) => return Poll::Ready(result),
-                Err(_would_block) => continue,
-            }
+        let mut guard = ready!(self.io.poll_read_ready(cx))?;
+        match guard.try_io(|_| {
+            let read = self.io.get_ref().read(buf.initialize_unfilled())?;
+            return Ok(buf.advance(read));
+        }) {
+            Ok(result) => return Poll::Ready(result),
+            Err(_would_block) => return Poll::Pending,
         }
     }
 }
