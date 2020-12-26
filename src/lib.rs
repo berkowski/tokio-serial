@@ -212,7 +212,7 @@ use std::os::unix::io::{AsRawFd, RawFd};
 #[cfg(unix)]
 impl AsRawFd for Serial {
     fn as_raw_fd(&self) -> RawFd {
-        self.io.get_ref().as_raw_fd()
+        self.io.as_raw_fd()
     }
 }
 
@@ -222,17 +222,16 @@ impl AsyncRead for Serial {
         cx: &mut Context<'_>,
         buf: &mut ReadBuf<'_>,
     ) -> Poll<io::Result<()>> {
-        println!("poll_read");
-        let mut guard = ready!(self.io.poll_read_ready(cx))?;
-        let res = guard.try_io(|_| {
-            let read = self.io.get_ref().read(buf.initialize_unfilled())?;
-            return Ok(buf.advance(read));
-        });
-
-        return match res {
-            Ok(x) => Poll::Ready(x),
-            Err(_) => Poll::Pending,
-        };
+        loop {
+            let mut guard = ready!(self.io.poll_read_ready(cx))?;
+            match guard.try_io(|_| {
+                let read = self.io.get_ref().read(buf.initialize_unfilled())?;
+                return Ok(buf.advance(read));
+            }) {
+                Ok(result) => return Poll::Ready(result),
+                Err(_would_block) => continue,
+            }
+        }
     }
 }
 
@@ -251,14 +250,14 @@ impl AsyncWrite for Serial {
 
     fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         let mut guard = ready!(self.io.poll_write_ready(cx))?;
-        return match guard.try_io(|_| self.io.get_ref().flush()) {
+        let result = match guard.try_io(|_| self.io.get_ref().flush()) {
             Ok(x) => Poll::Ready(x),
             Err(_) => Poll::Pending,
         };
+        return result;
     }
 
     fn poll_shutdown(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        println!("Shutdown");
         return Poll::Ready(Ok(()));
     }
 }
