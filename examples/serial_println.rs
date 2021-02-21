@@ -30,22 +30,20 @@ impl Decoder for LineCodec {
     }
 }
 
-impl Encoder for LineCodec {
-    type Item = String;
+impl Encoder<String> for LineCodec {
     type Error = io::Error;
 
-    fn encode(&mut self, _item: Self::Item, _dst: &mut BytesMut) -> Result<(), Self::Error> {
+    fn encode(&mut self, _item: String, _dst: &mut BytesMut) -> Result<(), Self::Error> {
         Ok(())
     }
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> tokio_serial::Result<()> {
     let mut args = env::args();
     let tty_path = args.nth(1).unwrap_or_else(|| DEFAULT_TTY.into());
 
-    let settings = tokio_serial::SerialPortSettings::default();
-    let mut port = tokio_serial::Serial::from_path(tty_path, &settings).unwrap();
+    let mut port = tokio_serial::TTYPort::open(&tokio_serial::new(tty_path, 9600))?;
 
     #[cfg(unix)]
     port.set_exclusive(false)
@@ -57,4 +55,5 @@ async fn main() {
         let line = line_result.expect("Failed to read line");
         println!("{}", line);
     }
+    Ok(())
 }

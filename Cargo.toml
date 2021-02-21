@@ -1,6 +1,6 @@
 [package]
 name = "tokio-serial"
-version = "4.3.3"
+version = "4.4.0-beta1"
 authors = ["Zac Berkowitz <zac.berkowitz@gmail.com>"]
 description = "A serial port implementation for tokio"
 license = "MIT"
@@ -19,13 +19,22 @@ travis-ci = { repository = "berkowski/tokio-serial", service = "github" }
 [features]
 default = ["libudev"]
 libudev = ["mio-serial/libudev"]
+rt = ["tokio/rt-multi-thread"]
 
 [dependencies]
-tokio = { version = "0.2.0", features = ["io-driver"], default-features = false }
-mio-serial = { version = "3.3.0", default-features = false }
+futures = "0.3"
+tokio = { version = "1.2.0", default-features = false , features = ["net"]}
+mio-serial = { version = "4.0.0-beta1", default-features = false }
 
 [dev-dependencies]
-futures = "0.3.1"
-tokio = { version = "0.2.0", features = ["macros"], default-features = false }
-tokio-util = { version = "0.2.0", features = ["codec"], default-features = false }
-bytes = "0.5"
+tokio = { version = "1.2.0", features = ["macros"], default-features = false }
+tokio-util = { version = "0.6", features = ["codec"], default-features = false }
+bytes = "1"
+
+[[example]]
+name = "serial_println"
+path = "examples/serial_println.rs"
+required-features = ["rt"]
+
+[patch.crates-io]
+mio-serial = {git = "https://github.com/berkowski/mio-serial", branch="v4.0"}
