@@ -1,6 +1,6 @@
 use futures::ready;
-use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::io::unix::AsyncFd;
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 use std::io::{self, Read, Write};
 use std::pin::Pin;
@@ -9,16 +9,17 @@ use std::time::Duration;
 
 /// Serial port I/O struct.
 pub struct TTYPort {
-    io: AsyncFd<mio_serial::TTYPort>
+    io: AsyncFd<mio_serial::TTYPort>,
 }
 
 impl TTYPort {
     /// Open serial port from a provided path, using the default reactor.
-    pub fn open(builder: &crate::SerialPortBuilder) -> crate::Result<Self>
-    {
+    pub fn open(builder: &crate::SerialPortBuilder) -> crate::Result<Self> {
         let port = mio_serial::TTYPort::open(builder)?;
 
-        Ok(Self { io: AsyncFd::new(port)? })
+        Ok(Self {
+            io: AsyncFd::new(port)?,
+        })
     }
 
     /// Create a pair of pseudo serial terminals using the default reactor
@@ -35,10 +36,10 @@ impl TTYPort {
         let (master, slave) = mio_serial::TTYPort::pair()?;
 
         let master = TTYPort {
-            io: AsyncFd::new(master)?
+            io: AsyncFd::new(master)?,
         };
         let slave = TTYPort {
-            io: AsyncFd::new(slave)?
+            io: AsyncFd::new(slave)?,
         };
         Ok((master, slave))
     }
@@ -181,7 +182,10 @@ impl crate::SerialPort for TTYPort {
 
     #[inline(always)]
     fn try_clone(&self) -> crate::Result<Box<dyn crate::SerialPort>> {
-        Err(crate::Error::new(crate::ErrorKind::Io(std::io::ErrorKind::Other), "Cannot clone Tokio handles"))
+        Err(crate::Error::new(
+            crate::ErrorKind::Io(std::io::ErrorKind::Other),
+            "Cannot clone Tokio handles",
+        ))
     }
 
     #[inline(always)]
@@ -223,10 +227,9 @@ impl AsRawFd for TTYPort {
 impl AsyncRead for TTYPort {
     fn poll_read(
         self: Pin<&mut Self>,
-        cx: &mut Context <'_>,
+        cx: &mut Context<'_>,
         buf: &mut ReadBuf<'_>,
     ) -> Poll<io::Result<()>> {
-
         loop {
             let mut guard = ready!(self.io.poll_read_ready(cx))?;
 
@@ -239,7 +242,11 @@ impl AsyncRead for TTYPort {
 }
 
 impl AsyncWrite for TTYPort {
-    fn poll_write(self: Pin<&mut Self>, cx: &mut Context <'_>, buf: &[u8]) -> Poll<io::Result<usize>> {
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<io::Result<usize>> {
         loop {
             let mut guard = ready!(self.io.poll_write_ready(cx))?;
 
@@ -250,7 +257,7 @@ impl AsyncWrite for TTYPort {
         }
     }
 
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context <'_>) -> Poll<io::Result<()>> {
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         loop {
             let mut guard = ready!(self.io.poll_write_ready(cx))?;
             match guard.try_io(|io| io.get_ref().flush()) {
@@ -260,7 +267,7 @@ impl AsyncWrite for TTYPort {
         }
     }
 
-    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context <'_>) -> Poll<io::Result<()>> {
+    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         let _ = self.poll_flush(cx)?;
         Ok(()).into()
     }
