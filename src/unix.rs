@@ -234,7 +234,13 @@ impl AsyncRead for TTYPort {
             let mut guard = ready!(self.io.poll_read_ready(cx))?;
 
             match guard.try_io(|io| io.get_ref().read(buf.initialize_unfilled())) {
-                Ok(_result) => return Poll::Ready(Ok(())),
+                Ok(Ok(bytes_read)) => {
+                    buf.advance(bytes_read);
+                    return Poll::Ready(Ok(()));
+                }
+                Ok(Err(err)) => {
+                    return Poll::Ready(Err(err));
+                }
                 Err(_would_block) => continue,
             }
         }
