@@ -21,3 +21,51 @@ pub type Result<T> = mio_serial::Result<T>;
 pub mod unix;
 #[cfg(unix)]
 pub use crate::unix::TTYPort;
+
+/// An extension trait for serialport::SerialPortBuilder
+///
+/// This trait adds two methods to SerialPortBuilder:
+///
+/// - open_async
+/// - open_native_async
+///
+/// These methods mirror the `open` and `open_native` methods of SerialPortBuilder
+pub trait SerialPortBuilderExt {
+    // /// Open a cross-platform interface to the port with the specified settings
+    // fn open_async(self) -> Result<Box<dyn MioSerialPort>>;
+
+    #[cfg(unix)]
+    /// Open a platform-specific interface to the port with the specified settings
+    fn open_native_async(self) -> Result<TTYPort>;
+
+    #[cfg(windows)]
+    /// Open a platform-specific interface to the port with the specified settings
+    fn open_native_async(self) -> Result<COMPort>;
+}
+impl SerialPortBuilderExt for SerialPortBuilder {
+    // /// Open a cross-platform interface to the port with the specified settings
+    // fn open_async(self) -> Result<Box<dyn MioSerialPort>> {
+    //     #[cfg(unix)]
+    //         return TTYPort::open(&self).map(|p| Box::new(p) as Box<dyn MioSerialPort>);
+
+    //     #[cfg(windows)]
+    //         return COMPort::open(&self).map(|p| Box::new(p) as Box<dyn MioSerialPort>);
+
+    //     #[cfg(not(any(unix, windows)))]
+    //         Err(Error::new(
+    //         ErrorKind::Unknown,
+    //         "open() not implemented for platform",
+    //     ))
+    // }
+    #[cfg(unix)]
+    /// Open a platform-specific interface to the port with the specified settings
+    fn open_native_async(self) -> Result<TTYPort> {
+        TTYPort::open(&self)
+    }
+
+    // #[cfg(windows)]
+    // /// Open a platform-specific interface to the port with the specified settings
+    // fn open_native_async(self) -> Result<COMPort> {
+    //     COMPort::open(&self)
+    // }
+}

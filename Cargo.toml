@@ -17,24 +17,43 @@ appveyor = { repository = "berkowski/tokio-serial", service = "github" }
 travis-ci = { repository = "berkowski/tokio-serial", service = "github" }
 
 [features]
-default = ["libudev"]
+default = []
 libudev = ["mio-serial/libudev"]
 rt = ["tokio/rt-multi-thread"]
+codec = ["tokio-util/codec", "bytes"]
 
-[dependencies]
-futures = "0.3"
-tokio = { version = "1.2.0", default-features = false , features = ["net"]}
-mio-serial = { version = "4.0.0-beta1", default-features = false }
+[dependencies.futures]
+version = "0.3"
 
-[dev-dependencies]
-tokio = { version = "1.2.0", features = ["macros"], default-features = false }
-tokio-util = { version = "0.6", features = ["codec"], default-features = false }
-bytes = "1"
+[dependencies.tokio]
+version = "1.2"
+default-features = false
+features = ["net"]
+
+[dependencies.tokio-util]
+version = "0.6"
+default-features = false
+optional = true
+
+[dependencies.mio-serial]
+version = "4.0.0-beta1"
+default-features = false
+
+[dependencies.bytes]
+version = "1"
+default-features = false
+optional = true
+
+[dev-dependencies.tokio]
+version = "1.2"
+features = ["macros"]
+default-features = false
+
 
 [[example]]
 name = "serial_println"
 path = "examples/serial_println.rs"
-required-features = ["rt"]
+required-features = ["rt", "codec"]
 
 [patch.crates-io]
 mio-serial = {git = "https://github.com/berkowski/mio-serial", branch="v4.0"}

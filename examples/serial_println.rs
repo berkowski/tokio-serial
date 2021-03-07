@@ -5,6 +5,7 @@ use std::{env, io, str};
 use tokio_util::codec::{Decoder, Encoder};
 
 use bytes::BytesMut;
+use tokio_serial::SerialPortBuilderExt;
 
 #[cfg(unix)]
 const DEFAULT_TTY: &str = "/dev/ttyUSB0";
@@ -43,7 +44,7 @@ async fn main() -> tokio_serial::Result<()> {
     let mut args = env::args();
     let tty_path = args.nth(1).unwrap_or_else(|| DEFAULT_TTY.into());
 
-    let mut port = tokio_serial::TTYPort::open(&tokio_serial::new(tty_path, 9600))?;
+    let mut port = tokio_serial::new(tty_path, 9600).open_native_async()?;
 
     #[cfg(unix)]
     port.set_exclusive(false)
