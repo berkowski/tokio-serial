@@ -1,11 +1,11 @@
-//! A unified [`Stream`] and [`Sink`] interface to an underlying `TTYPort`, using
+//! A unified [`Stream`] and [`Sink`] interface to an underlying `SerialStream`, using
 //! the `Encoder` and `Decoder` traits to encode and decode frames.
-use super::TTYPort;
+use super::SerialStream;
 
 use tokio_util::codec::{Decoder, Encoder};
 
 use futures::{Sink, Stream};
-use tokio::io::ReadBuf;
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 use bytes::{BufMut, BytesMut};
 use futures::ready;
@@ -13,7 +13,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::{io, mem::MaybeUninit};
 
-/// A unified [`Stream`] and [`Sink`] interface to an underlying `TTYPort`, using
+/// A unified [`Stream`] and [`Sink`] interface to an underlying `SerialStream`, using
 /// the `Encoder` and `Decoder` traits to encode and decode frames.
 ///
 /// Raw serial ports work with bytes, but higher-level code usually wants to
@@ -27,7 +27,7 @@ use std::{io, mem::MaybeUninit};
 /// require both read and write access to the underlying object.
 ///
 /// If you want to work more directly with the streams and sink, consider
-/// calling [`split`] on the `TTYFramed` returned by this method, which will break
+/// calling [`split`] on the `SerialFramed` returned by this method, which will break
 /// them into separate objects, allowing them to interact more easily.
 ///
 /// [`Stream`]: futures_core::Stream
@@ -35,8 +35,8 @@ use std::{io, mem::MaybeUninit};
 /// [`split`]: https://docs.rs/futures/0.3/futures/stream/trait.StreamExt.html#method.split
 #[must_use = "sinks do nothing unless polled"]
 #[derive(Debug)]
-pub struct TTYFramed<C> {
-    port: TTYPort,
+pub struct SerialFramed<C> {
+    port: SerialStream,
     codec: C,
     rd: BytesMut,
     wr: BytesMut,
@@ -47,7 +47,7 @@ pub struct TTYFramed<C> {
 const INITIAL_RD_CAPACITY: usize = 64 * 1024;
 const INITIAL_WR_CAPACITY: usize = 8 * 1024;
 
-impl<C: Decoder + Unpin> Stream for TTYFramed<C> {
+impl<C: Decoder + Unpin> Stream for SerialFramed<C> {
     type Item = Result<C::Item, C::Error>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
@@ -85,7 +85,7 @@ impl<C: Decoder + Unpin> Stream for TTYFramed<C> {
     }
 }
 
-impl<I, C: Encoder<I> + Unpin> Sink<I> for TTYFramed<C> {
+impl<I, C: Encoder<I> + Unpin> Sink<I> for SerialFramed<C> {
     type Error = C::Error;
 
     fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
@@ -145,11 +145,12 @@ impl<I, C: Encoder<I> + Unpin> Sink<I> for TTYFramed<C> {
     }
 }
 
-impl<C> TTYFramed<C> {
-    /// Create a new `TTYFramed` backed by the given socket and codec.
+impl<C> SerialFramed<C> {
+    /// Create a new `SerialFramed` backed by the given socket and codec.
     ///
     /// See struct level documentation for more details.
-    pub fn new(port: TTYPort, codec: C) -> TTYFramed<C> {
+    #[allow(dead_code)]
+    pub fn new(port: SerialStream, codec: C) -> SerialFramed<C> {
         Self {
             port,
             codec,
@@ -167,7 +168,8 @@ impl<C> TTYFramed<C> {
     /// Care should be taken to not tamper with the underlying stream of data
     /// coming in as it may corrupt the stream of frames otherwise being worked
     /// with.
-    pub fn get_ref(&self) -> &TTYPort {
+    #[allow(dead_code)]
+    pub fn get_ref(&self) -> &SerialStream {
         &self.port
     }
 
@@ -179,12 +181,14 @@ impl<C> TTYFramed<C> {
     /// Care should be taken to not tamper with the underlying stream of data
     /// coming in as it may corrupt the stream of frames otherwise being worked
     /// with.
-    pub fn get_mut(&mut self) -> &mut TTYPort {
+    #[allow(dead_code)]
+    pub fn get_mut(&mut self) -> &mut SerialStream {
         &mut self.port
     }
 
     /// Consumes the `Framed`, returning its underlying I/O stream.
-    pub fn into_inner(self) -> TTYPort {
+    #[allow(dead_code)]
+    pub fn into_inner(self) -> SerialStream {
         self.port
     }
 
@@ -193,25 +197,29 @@ impl<C> TTYFramed<C> {
     ///
     /// Note that care should be taken to not tamper with the underlying codec
     /// as it may corrupt the stream of frames otherwise being worked with.
+    #[allow(dead_code)]
     pub fn codec(&self) -> &C {
         &self.codec
     }
 
     /// Returns a mutable reference to the underlying codec wrapped by
-    /// `TTYFramed`.
+    /// `SerialFramed`.
     ///
     /// Note that care should be taken to not tamper with the underlying codec
     /// as it may corrupt the stream of frames otherwise being worked with.
+    #[allow(dead_code)]
     pub fn codec_mut(&mut self) -> &mut C {
         &mut self.codec
     }
 
     /// Returns a reference to the read buffer.
+    #[allow(dead_code)]
     pub fn read_buffer(&self) -> &BytesMut {
         &self.rd
     }
 
     /// Returns a mutable reference to the read buffer.
+    #[allow(dead_code)]
     pub fn read_buffer_mut(&mut self) -> &mut BytesMut {
         &mut self.rd
     }

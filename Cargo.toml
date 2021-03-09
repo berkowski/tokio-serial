@@ -56,4 +56,4 @@ path = "examples/serial_println.rs"
 required-features = ["rt", "codec"]
 
 [patch.crates-io]
-mio-serial = {git = "https://github.com/berkowski/mio-serial", branch="v4.0"}
+mio-serial = {git = "https://github.com/berkowski/mio-serial", branch="v4.0_serialstream"}
