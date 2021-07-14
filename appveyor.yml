@@ -1,10 +1,7 @@
-# Appveyor configuration template for Rust using rustup for Rust installation
-# https://github.com/starkat99/appveyor-rust
-
-## Operating System (VM environment) ##
-
-# Rust needs at least Visual Studio 2013 Appveyor OS for MSVC targets.
-os: Visual Studio 2015
+image:
+  - Ubuntu
+  - macOS
+  - Visual Studio 2019
 
 ## Build Matrix ##
 
@@ -32,68 +29,13 @@ os: Visual Studio 2015
 # and rustc, respectively. For instance, you can uncomment the cargoflags lines in the nightly
 # channels to enable unstable features when building for nightly. Or you could add additional
 # matrix entries to test different combinations of features.
+
 environment:
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
   matrix:
-
-### MSVC Toolchains ###
-
-  # Stable 64-bit MSVC
     - channel: stable
-      target: x86_64-pc-windows-msvc
-  # Stable 32-bit MSVC
-    - channel: stable
-      target: i686-pc-windows-msvc
-  # Beta 64-bit MSVC
     - channel: beta
-      target: x86_64-pc-windows-msvc
-  # Beta 32-bit MSVC
-    - channel: beta
-      target: i686-pc-windows-msvc
-  # Nightly 64-bit MSVC
     - channel: nightly
-      target: x86_64-pc-windows-msvc
-      #cargoflags: --features "unstable"
-  # Nightly 32-bit MSVC
-    - channel: nightly
-      target: i686-pc-windows-msvc
-      #cargoflags: --features "unstable"
-
-### GNU Toolchains ###
-
-  # Stable 64-bit GNU
-    - channel: stable
-      target: x86_64-pc-windows-gnu
-  # Stable 32-bit GNU
-    - channel: stable
-      target: i686-pc-windows-gnu
-  # Beta 64-bit GNU
-    - channel: beta
-      target: x86_64-pc-windows-gnu
-  # Beta 32-bit GNU
-    - channel: beta
-      target: i686-pc-windows-gnu
-  # Nightly 64-bit GNU
-    - channel: nightly
-      target: x86_64-pc-windows-gnu
-      #cargoflags: --features "unstable"
-  # Nightly 32-bit GNU
-    - channel: nightly
-      target: i686-pc-windows-gnu
-      #cargoflags: --features "unstable"
-
-### Allowed failures ###
-
-# See Appveyor documentation for specific details. In short, place any channel or targets you wish
-# to allow build failures on (usually nightly at least is a wise choice). This will prevent a build
-# or test failure in the matching channels/targets from failing the entire build.
-matrix:
-  allow_failures:
-    - channel: nightly
-
-# If you only care about stable channel build failures, uncomment the following line:
-    #- channel: beta
-
-## Install Script ##
 
 # This is the most important part of the Appveyor configuration. This installs the version of Rust
 # specified by the 'channel' and 'target' environment variables from the build matrix. This uses
@@ -102,9 +44,14 @@ matrix:
 # For simple configurations, instead of using the build matrix, you can simply set the
 # default-toolchain and default-host manually here.
 install:
-  - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
-  - rustup-init -yv --default-toolchain %channel% --default-host %target%
-  - set PATH=%PATH%;%USERPROFILE%\.cargo\bin
+  - cmd: appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+  - cmd: rustup-init -yv --default-toolchain %channel%
+  - cmd: set PATH=%PATH%;%USERPROFILE%\.cargo\bin
+  - sh: curl --proto '=https' --tlsv1.2 -sSf -o rustup-init https://sh.rustup.rs
+  - sh: chmod u+x rustup-init
+  - sh: ./rustup-init -y --default-toolchain ${channel}
+  - sh: source $HOME/.cargo/env
+  #- sh: export PATH=${PATH};${HOME}/.cargo/bin
   - rustc -vV
   - cargo -vV
 
@@ -118,5 +65,4 @@ build: false
 #directly or perform other testing commands. Rust will automatically be placed in the PATH
 # environment variable.
 test_script:
-  - cargo test --verbose %cargoflags%
-
+  - cargo test --verbose
