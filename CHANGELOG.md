@@ -5,17 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
-[5.4.0] UNRELEASED
+[5.4.0-beta1] UNRELEASED
 
 Major release drawing in updates to `tokio` and `mio-serial` (and the upstream `serialport-rs`)
 
 ### Changed
 - Bumped [tokio](https://github.com/tokio-rs/tokio) to 1.0
-- Bumped [mio-serial](https://github.com/berkowski/mio-serial) to 4.0
+- Bumped [mio-serial](https://github.com/berkowski/mio-serial) to 4.0.0-beta1
 
 ### Contributions
 - [#35](https://github.com/berkowski/tokio-serial/pull/35) by [georgmu](https://github.com/georgmu) found an early bug in the AsyncRead trait impl
-
+- [#39](https://github.com/berkowski/tokio-serial/pull/39) by [ColinFinck](https://github.com/ColinFinck) took it upon himself to push windows support for Tokio 1.X
+  and did the vast majority of the work
+  
 ## [4.3.3] 2019-11-24
 ### Changed
 * @Darksonn bumped tokio dependencies to version 0.2.0 and cleaned up some dependencies in PR [#24](https://github.com/berkowski/tokio-serial/pull/24)
