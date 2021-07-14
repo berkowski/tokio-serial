@@ -1,6 +1,6 @@
 use std::ffi::OsStr;
 use std::io::{self, Read, Write};
-use std::mem;
+use std::mem::{self, ManuallyDrop};
 use std::os::windows::ffi::OsStrExt;
 use std::os::windows::io::{FromRawHandle, RawHandle};
 use std::path::Path;
@@ -19,7 +19,11 @@ use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE, HAND
 
 #[derive(Debug)]
 pub(crate) struct WindowsSerialStream {
-    inner: COMPort,
+    // [EG] We use `ManuallyDrop` because both `COMPort` and `NamedPipeClient` take
+    // ownership of the raw handle. To avoid closing the handle twice when
+    // the `Serial` is dropped, we explicitly do **not** drop one of the
+    // owned instances. Yes, it is a hack.
+    inner: ManuallyDrop<COMPort>,
 
     // [CF] Named pipes and COM ports are actually two entirely different things that hardly have anything in common.
     // The only thing they share is the opaque `HANDLE` type that can be fed into `CreateFileW`, `ReadFile`, `WriteFile`, etc.
@@ -85,12 +89,10 @@ impl WindowsSerialStream {
         com_port.set_flow_control(flow_control)?;
         Self::override_comm_timeouts(handle)?;
 
+        let inner = ManuallyDrop::new(com_port);
         let pipe = unsafe { NamedPipeClient::from_raw_handle(handle)? };
 
-        Ok(Self {
-            inner: com_port,
-            pipe,
-        })
+        Ok(Self { inner, pipe })
     }
 
     pub fn get_ref(&self) -> &COMPort {
