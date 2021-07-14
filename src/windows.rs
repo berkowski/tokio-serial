@@ -1,6 +1,5 @@
-use serialport::SerialPort;
 use std::ffi::OsStr;
-use std::io;
+use std::io::{self, Read, Write};
 use std::mem;
 use std::os::windows::ffi::OsStrExt;
 use std::os::windows::io::{FromRawHandle, RawHandle};
@@ -8,6 +7,8 @@ use std::path::Path;
 use std::pin::Pin;
 use std::ptr;
 use std::task::{Context, Poll};
+
+use serialport::{COMPort, SerialPort, SerialPortBuilder};
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::net::windows::named_pipe::NamedPipeClient;
 use winapi::um::commapi::SetCommTimeouts;
@@ -17,8 +18,8 @@ use winapi::um::winbase::{COMMTIMEOUTS, FILE_FLAG_OVERLAPPED};
 use winapi::um::winnt::{FILE_ATTRIBUTE_NORMAL, GENERIC_READ, GENERIC_WRITE, HANDLE};
 
 #[derive(Debug)]
-pub struct AsyncWindowsSerialStream {
-    inner: serialport::COMPort,
+pub(crate) struct WindowsSerialStream {
+    inner: COMPort,
 
     // [CF] Named pipes and COM ports are actually two entirely different things that hardly have anything in common.
     // The only thing they share is the opaque `HANDLE` type that can be fed into `CreateFileW`, `ReadFile`, `WriteFile`, etc.
@@ -28,11 +29,11 @@ pub struct AsyncWindowsSerialStream {
     pipe: NamedPipeClient,
 }
 
-impl AsyncWindowsSerialStream {
+impl WindowsSerialStream {
     /// Opens a COM port at the specified path
     // [CF] Copied from https://github.com/berkowski/mio-serial/blob/38a3778324da5e312cfb31402bd89e52d0548a4c/src/lib.rs#L113-L166
     // See remarks in the code for important changes!
-    pub fn open(builder: &crate::SerialPortBuilder) -> crate::Result<Self> {
+    pub fn open(builder: &SerialPortBuilder) -> crate::Result<Self> {
         let (path, baud, parity, data_bits, stop_bits, flow_control) = {
             let com_port = serialport::COMPort::open(builder)?;
             let name = com_port.name().ok_or(crate::Error::new(
@@ -92,18 +93,11 @@ impl AsyncWindowsSerialStream {
         })
     }
 
-    // [CF] Get a reference to the underlying `COMPort`.
-    // The Unix implementation gets a reference to the underlying `mio_serial::SerialStream`,
-    // but we don't use `mio_serial::SerialStream` for tokio-serial's Windows implementation.
-    // As long as tokio-serial only calls `SerialPort` trait methods on the returned reference,
-    // this is compatible.
-    pub fn get_ref(&self) -> &serialport::COMPort {
+    pub fn get_ref(&self) -> &COMPort {
         &self.inner
     }
 
-    // [CF] Get a mutable reference to the underlying `COMPort`.
-    // Notes from above apply.
-    pub fn get_mut(&mut self) -> &mut serialport::COMPort {
+    pub fn get_mut(&mut self) -> &mut COMPort {
         &mut self.inner
     }
 
@@ -138,7 +132,23 @@ impl AsyncWindowsSerialStream {
     }
 }
 
-impl AsyncRead for AsyncWindowsSerialStream {
+impl Read for WindowsSerialStream {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        self.pipe.try_read(buf)
+    }
+}
+
+impl Write for WindowsSerialStream {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.pipe.try_write(buf)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        self.inner.flush()
+    }
+}
+
+impl AsyncRead for WindowsSerialStream {
     fn poll_read(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -148,7 +158,7 @@ impl AsyncRead for AsyncWindowsSerialStream {
     }
 }
 
-impl AsyncWrite for AsyncWindowsSerialStream {
+impl AsyncWrite for WindowsSerialStream {
     fn poll_write(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
