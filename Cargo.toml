@@ -36,8 +36,7 @@ default-features = false
 optional = true
 
 [dependencies.mio-serial]
-git = "https://github.com/berkowski/mio-serial"
-branch="v4.0_serialstream"
+version = "4.0.0-beta1"
 default-features = false
 
 [dependencies.bytes]
