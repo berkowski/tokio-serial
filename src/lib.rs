@@ -13,7 +13,6 @@ pub use mio_serial::{
     SerialPortBuilder, StopBits,
 };
 
-use futures::ready;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 use std::io::{self, Read, Write};
@@ -24,9 +23,18 @@ use std::time::Duration;
 #[cfg(feature = "codec")]
 mod frame;
 
+#[cfg(windows)]
+mod windows;
+
 #[cfg(unix)]
 mod os_prelude {
+    pub use futures::ready;
     pub use tokio::io::unix::AsyncFd;
+}
+
+#[cfg(windows)]
+mod os_prelude {
+    pub use crate::windows::AsyncWindowsSerialStream;
 }
 
 use crate::os_prelude::*;
@@ -47,17 +55,28 @@ pub type Result<T> = mio_serial::Result<T>;
 pub struct SerialStream {
     #[cfg(unix)]
     inner: AsyncFd<mio_serial::SerialStream>,
+    #[cfg(windows)]
+    inner: AsyncWindowsSerialStream,
 }
 
 impl SerialStream {
     /// Open serial port from a provided path, using the default reactor.
     pub fn open(builder: &crate::SerialPortBuilder) -> crate::Result<Self> {
-        let port = mio_serial::SerialStream::open(builder)?;
-
         #[cfg(unix)]
-        Ok(Self {
-            inner: AsyncFd::new(port)?,
-        })
+        {
+            let port = mio_serial::SerialStream::open(builder)?;
+
+            Ok(Self {
+                inner: AsyncFd::new(port)?,
+            })
+        }
+
+        #[cfg(windows)]
+        {
+            Ok(Self {
+                inner: AsyncWindowsSerialStream::open(builder)?,
+            })
+        }
     }
 
     /// Create a pair of pseudo serial terminals using the default reactor
@@ -151,6 +170,7 @@ impl SerialStream {
     }
 }
 
+#[cfg(unix)]
 impl AsyncRead for SerialStream {
     /// Attempts to ready bytes on the serial port.
     ///
@@ -191,6 +211,7 @@ impl AsyncRead for SerialStream {
     }
 }
 
+#[cfg(unix)]
 impl AsyncWrite for SerialStream {
     /// Attempts to send data on the serial port
     ///
@@ -237,6 +258,36 @@ impl AsyncWrite for SerialStream {
     fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         let _ = self.poll_flush(cx)?;
         Ok(()).into()
+    }
+}
+
+#[cfg(windows)]
+impl AsyncRead for SerialStream {
+    fn poll_read(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut ReadBuf<'_>,
+    ) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.get_mut().inner).poll_read(cx, buf)
+    }
+}
+
+#[cfg(windows)]
+impl AsyncWrite for SerialStream {
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<io::Result<usize>> {
+        Pin::new(&mut self.get_mut().inner).poll_write(cx, buf)
+    }
+
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.get_mut().inner).poll_flush(cx)
+    }
+
+    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.get_mut().inner).poll_shutdown(cx)
     }
 }
 
@@ -370,12 +421,14 @@ impl crate::SerialPort for SerialStream {
     }
 }
 
+#[cfg(unix)]
 impl Read for SerialStream {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.inner.get_mut().read(buf)
     }
 }
 
+#[cfg(unix)]
 impl Write for SerialStream {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.inner.get_mut().write(buf)
@@ -383,6 +436,40 @@ impl Write for SerialStream {
 
     fn flush(&mut self) -> io::Result<()> {
         self.inner.get_mut().flush()
+    }
+}
+
+// [CF] Most tokio crates don't implement synchronous `Read` and `Write` next to `AsyncRead`/`AsyncWrite`,
+// and mixing them is usually discouraged.
+// But tokio-serial implements the `SerialPort` trait on `SerialStream`, and this one requires `Read` and `Write`.
+//
+// We can't just use the `Read` and `Write` implementations of `serialport::COMPort` here.
+// They expect Win32 handles opened without FILE_FLAG_OVERLAPPED, but our handles are opened this way.
+// Every ReadFile/WriteFile call of `serialport::COMPort` will error immediately due to the missing OVERLAPPED structure.
+//
+// The upcoming move to Overlapped I/O in https://gitlab.com/susurrus/serialport-rs/-/merge_requests/91 won't change that either.
+// After that change and trying to use `serialport::COMPort::{read, write}` from here, we will get an access violation.
+// This happens because every Overlapped I/O operation fires an event and every event is reported to the I/O Completion Port of
+// our `NamedPipeClient`. The IOCP handler in `mio` expects a callback to be associated to each event, and if that callback
+// doesn't exist, things go bust with a STATUS_ACCESS_VIOLATION exception.
+//
+// Tokio's architecture also doesn't let us use our async functions in a synchronous context.
+// Hence, `Read` and `Write` are simply unimplemented under Windows.
+#[cfg(windows)]
+impl Read for SerialStream {
+    fn read(&mut self, _buf: &mut [u8]) -> io::Result<usize> {
+        unimplemented!("Use AsyncRead instead");
+    }
+}
+
+#[cfg(windows)]
+impl Write for SerialStream {
+    fn write(&mut self, _buf: &[u8]) -> io::Result<usize> {
+        unimplemented!("Use AsyncWrite instead");
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        unimplemented!("Use AsyncWrite instead");
     }
 }
 
@@ -413,7 +500,6 @@ pub trait SerialPortBuilderExt {
     // /// Open a cross-platform interface to the port with the specified settings
     // fn open_async(self) -> Result<Box<dyn MioSerialPort>>;
 
-    #[cfg(unix)]
     /// Open a platform-specific interface to the port with the specified settings
     fn open_async(self) -> Result<SerialStream>;
 }
