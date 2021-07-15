@@ -356,7 +356,19 @@ mod sys {
 
     impl AsRawFd for SerialStream {
         fn as_raw_fd(&self) -> RawFd {
-            self.inner.get_ref().as_raw_fd()
+            self.inner.as_raw_fd()
+        }
+    }
+}
+
+#[cfg(windows)]
+mod sys {
+    use super::SerialStream;
+    use std::os::windows::io::{AsRawHandle, RawHandle};
+
+    impl AsRawHandle for SerialStream {
+        fn as_raw_handle(&self) -> RawHandle {
+            self.inner.as_raw_handle()
         }
     }
 }
