@@ -7,8 +7,8 @@
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
 
-// Re-export serialport types and traits
-pub use serialport::{
+// Re-export serialport types and traits from mio_serial
+pub use mio_serial::{
     available_ports, new, ClearBuffer, DataBits, Error, ErrorKind, FlowControl, Parity, Result,
     SerialPort, SerialPortBuilder, SerialPortInfo, StopBits,
 };
@@ -50,7 +50,9 @@ pub struct SerialStream {
 impl SerialStream {
     /// Open serial port from a provided path, using the default reactor.
     pub fn open(builder: &SerialPortBuilder) -> crate::Result<Self> {
-        let inner = NativeSerialStream::open(builder)?;
+        let port = mio_serial::SerialStream::open(builder)?;
+        let inner = NativeSerialStream::new(port)?;
+
         Ok(Self { inner })
     }
 

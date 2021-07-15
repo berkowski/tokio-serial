@@ -19,15 +19,9 @@ travis-ci = { repository = "berkowski/tokio-serial", service = "github" }
 [dependencies]
 bytes = { version = "1", default-features = false, optional = true }
 futures = "0.3"
-serialport = { version = "4", default-features = false }
+mio-serial = { version = "4.0.0-beta2", default-features = false }
 tokio = { version = "1.8.1", default-features = false, features = ["net"] }
 tokio-util = { version = "0.6", default-features = false, optional = true }
-
-[target.'cfg(unix)'.dependencies]
-nix = "0.22"
-
-[target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["commapi", "fileapi", "handleapi", "winbase", "winnt"] }
 
 [dev-dependencies]
 tokio = { version = "1.8.1", default-features = false, features = ["macros"] }
@@ -35,10 +29,13 @@ tokio = { version = "1.8.1", default-features = false, features = ["macros"] }
 [features]
 default = []
 codec = ["bytes", "tokio-util/codec"]
-libudev = ["serialport/libudev"]
+libudev = ["mio-serial/libudev"]
 rt = ["tokio/rt-multi-thread"]
 
 [[example]]
 name = "serial_println"
 path = "examples/serial_println.rs"
 required-features = ["rt", "codec"]
+
+[patch.crates-io]
+mio-serial = { git = "https://github.com/berkowski/mio-serial" }
