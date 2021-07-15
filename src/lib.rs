@@ -15,7 +15,7 @@ pub use mio_serial::{
 
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
-use std::io::{self, Read, Write};
+use std::io::{Read, Result as IoResult, Write};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
@@ -165,7 +165,7 @@ impl SerialStream {
     ///
     /// When there is no pending data, `Err(io::ErrorKind::WouldBlock)` is
     /// returned. This function is usually paired with `readable()`.
-    pub fn try_read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+    pub fn try_read(&mut self, buf: &mut [u8]) -> IoResult<usize> {
         #[cfg(unix)]
         {
             self.inner.get_mut().read(buf)
@@ -183,7 +183,7 @@ impl SerialStream {
     /// The function may complete without the socket being readable. This is a
     /// false-positive and attempting a `try_read()` will return with
     /// `io::ErrorKind::WouldBlock`.
-    pub async fn readable(&self) -> io::Result<()> {
+    pub async fn readable(&self) -> IoResult<()> {
         let _ = self.inner.readable().await?;
         Ok(())
     }
@@ -192,7 +192,7 @@ impl SerialStream {
     ///
     /// When the write would block, `Err(io::ErrorKind::WouldBlock)` is
     /// returned. This function is usually paired with `writable()`.
-    pub fn try_write(&mut self, buf: &[u8]) -> io::Result<usize> {
+    pub fn try_write(&mut self, buf: &[u8]) -> IoResult<usize> {
         #[cfg(unix)]
         {
             self.inner.get_mut().write(buf)
@@ -210,7 +210,7 @@ impl SerialStream {
     /// The function may complete without the socket being readable. This is a
     /// false-positive and attempting a `try_write()` will return with
     /// `io::ErrorKind::WouldBlock`.
-    pub async fn writable(&self) -> io::Result<()> {
+    pub async fn writable(&self) -> IoResult<()> {
         let _ = self.inner.writable().await?;
         Ok(())
     }
@@ -239,7 +239,7 @@ impl AsyncRead for SerialStream {
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
         buf: &mut ReadBuf<'_>,
-    ) -> Poll<io::Result<()>> {
+    ) -> Poll<IoResult<()>> {
         loop {
             let mut guard = ready!(self.inner.poll_read_ready(cx))?;
 
@@ -276,11 +276,7 @@ impl AsyncWrite for SerialStream {
     /// # Errors
     ///
     /// This function may encounter any standard I/O error except `WouldBlock`.
-    fn poll_write(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &[u8],
-    ) -> Poll<io::Result<usize>> {
+    fn poll_write(self: Pin<&mut Self>, cx: &mut Context<'_>, buf: &[u8]) -> Poll<IoResult<usize>> {
         loop {
             let mut guard = ready!(self.inner.poll_write_ready(cx))?;
 
@@ -291,7 +287,7 @@ impl AsyncWrite for SerialStream {
         }
     }
 
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<IoResult<()>> {
         loop {
             let mut guard = ready!(self.inner.poll_write_ready(cx))?;
             match guard.try_io(|inner| inner.get_ref().flush()) {
@@ -301,7 +297,7 @@ impl AsyncWrite for SerialStream {
         }
     }
 
-    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<IoResult<()>> {
         let _ = self.poll_flush(cx)?;
         Ok(()).into()
     }
@@ -313,7 +309,7 @@ impl AsyncRead for SerialStream {
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
         buf: &mut ReadBuf<'_>,
-    ) -> Poll<io::Result<()>> {
+    ) -> Poll<IoResult<()>> {
         let mut self_ = self;
         Pin::new(&mut self_.inner).poll_read(cx, buf)
     }
@@ -321,21 +317,17 @@ impl AsyncRead for SerialStream {
 
 #[cfg(windows)]
 impl AsyncWrite for SerialStream {
-    fn poll_write(
-        self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-        buf: &[u8],
-    ) -> Poll<io::Result<usize>> {
+    fn poll_write(self: Pin<&mut Self>, cx: &mut Context<'_>, buf: &[u8]) -> Poll<IoResult<usize>> {
         let mut self_ = self;
         Pin::new(&mut self_.inner).poll_write(cx, buf)
     }
 
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<IoResult<()>> {
         let mut self_ = self;
         Pin::new(&mut self_.inner).poll_flush(cx)
     }
 
-    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<IoResult<()>> {
         let mut self_ = self;
         Pin::new(&mut self_.inner).poll_shutdown(cx)
     }
@@ -472,17 +464,17 @@ impl crate::SerialPort for SerialStream {
 }
 
 impl Read for SerialStream {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> IoResult<usize> {
         self.try_read(buf)
     }
 }
 
 impl Write for SerialStream {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+    fn write(&mut self, buf: &[u8]) -> IoResult<usize> {
         self.try_write(buf)
     }
 
-    fn flush(&mut self) -> io::Result<()> {
+    fn flush(&mut self) -> IoResult<()> {
         self.borrow_mut().flush()
     }
 }
@@ -491,7 +483,6 @@ impl Write for SerialStream {
 mod sys {
     use super::SerialStream;
     use std::os::unix::io::{AsRawFd, RawFd};
-    #[cfg(unix)]
     impl AsRawFd for SerialStream {
         fn as_raw_fd(&self) -> RawFd {
             self.inner.get_ref().as_raw_fd()
@@ -499,6 +490,16 @@ mod sys {
     }
 }
 
+#[cfg(windows)]
+mod io {
+    use super::SerialStream;
+    use std::os::windows::io::{AsRawHandle, RawHandle};
+    impl AsRawHandle for SerialStream {
+        fn as_raw_handle(&self) -> RawHandle {
+            self.inner.as_raw_handle()
+        }
+    }
+}
 //
 //
 //
