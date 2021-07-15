@@ -471,55 +471,19 @@ impl crate::SerialPort for SerialStream {
     }
 }
 
-#[cfg(unix)]
 impl Read for SerialStream {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.inner.get_mut().read(buf)
+        self.try_read(buf)
     }
 }
 
-#[cfg(unix)]
 impl Write for SerialStream {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.inner.get_mut().write(buf)
+        self.try_write(buf)
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        self.inner.get_mut().flush()
-    }
-}
-
-// [CF] Most tokio crates don't implement synchronous `Read` and `Write` next to `AsyncRead`/`AsyncWrite`,
-// and mixing them is usually discouraged.
-// But tokio-serial implements the `SerialPort` trait on `SerialStream`, and this one requires `Read` and `Write`.
-//
-// We can't just use the `Read` and `Write` implementations of `serialport::COMPort` here.
-// They expect Win32 handles opened without FILE_FLAG_OVERLAPPED, but our handles are opened this way.
-// Every ReadFile/WriteFile call of `serialport::COMPort` will error immediately due to the missing OVERLAPPED structure.
-//
-// The upcoming move to Overlapped I/O in https://gitlab.com/susurrus/serialport-rs/-/merge_requests/91 won't change that either.
-// After that change and trying to use `serialport::COMPort::{read, write}` from here, we will get an access violation.
-// This happens because every Overlapped I/O operation fires an event and every event is reported to the I/O Completion Port of
-// our `NamedPipeClient`. The IOCP handler in `mio` expects a callback to be associated to each event, and if that callback
-// doesn't exist, things go bust with a STATUS_ACCESS_VIOLATION exception.
-//
-// Tokio's architecture also doesn't let us use our async functions in a synchronous context.
-// Hence, `Read` and `Write` are simply unimplemented under Windows.
-#[cfg(windows)]
-impl Read for SerialStream {
-    fn read(&mut self, _buf: &mut [u8]) -> io::Result<usize> {
-        unimplemented!("Use AsyncRead instead");
-    }
-}
-
-#[cfg(windows)]
-impl Write for SerialStream {
-    fn write(&mut self, _buf: &[u8]) -> io::Result<usize> {
-        unimplemented!("Use AsyncWrite instead");
-    }
-
-    fn flush(&mut self) -> io::Result<()> {
-        unimplemented!("Use AsyncWrite instead");
+        self.borrow_mut().flush()
     }
 }
 
