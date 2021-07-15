@@ -23,9 +23,6 @@ use std::time::Duration;
 #[cfg(feature = "codec")]
 mod frame;
 
-#[cfg(windows)]
-mod windows;
-
 #[cfg(unix)]
 mod os_prelude {
     pub use futures::ready;
@@ -34,7 +31,10 @@ mod os_prelude {
 
 #[cfg(windows)]
 mod os_prelude {
-    pub use crate::windows::AsyncWindowsSerialStream;
+    pub use std::mem;
+    pub use std::ops::{Deref, DerefMut};
+    pub use std::os::windows::prelude::*;
+    pub use tokio::net::windows::named_pipe;
 }
 
 use crate::os_prelude::*;
@@ -56,16 +56,19 @@ pub struct SerialStream {
     #[cfg(unix)]
     inner: AsyncFd<mio_serial::SerialStream>,
     #[cfg(windows)]
-    inner: AsyncWindowsSerialStream,
+    inner: named_pipe::NamedPipeClient,
+    // The com port is kept around for serialport related methods
+    #[cfg(windows)]
+    com: mem::ManuallyDrop<mio_serial::SerialStream>,
 }
 
 impl SerialStream {
     /// Open serial port from a provided path, using the default reactor.
     pub fn open(builder: &crate::SerialPortBuilder) -> crate::Result<Self> {
+        let port = mio_serial::SerialStream::open(builder)?;
+
         #[cfg(unix)]
         {
-            let port = mio_serial::SerialStream::open(builder)?;
-
             Ok(Self {
                 inner: AsyncFd::new(port)?,
             })
@@ -73,8 +76,12 @@ impl SerialStream {
 
         #[cfg(windows)]
         {
+            let handle = port.as_raw_handle();
+            // Keep the com port around to use for serialport related things
+            let com = mem::ManuallyDrop::new(port);
             Ok(Self {
-                inner: AsyncWindowsSerialStream::open(builder)?,
+                inner: unsafe { named_pipe::NamedPipeClient::from_raw_handle(handle)? },
+                com,
             })
         }
     }
@@ -125,6 +132,31 @@ impl SerialStream {
         self.inner.get_ref().exclusive()
     }
 
+    /// Borrow a reference to the underlying mio-serial::SerialStream object.
+    #[inline(always)]
+    fn borrow(&self) -> &mio_serial::SerialStream {
+        #[cfg(unix)]
+        {
+            self.inner.get_ref()
+        }
+        #[cfg(windows)]
+        {
+            self.com.deref()
+        }
+    }
+
+    /// Borrow a mutable reference to the underlying mio-serial::SerialStream object.
+    #[inline(always)]
+    fn borrow_mut(&mut self) -> &mut mio_serial::SerialStream {
+        #[cfg(unix)]
+        {
+            self.inner.get_mut()
+        }
+        #[cfg(windows)]
+        {
+            self.com.deref_mut()
+        }
+    }
     /// Try to read bytes on the serial port.  On success returns the number of bytes read.
     ///
     /// The function must be called with valid byte array `buf` of sufficient
@@ -134,7 +166,14 @@ impl SerialStream {
     /// When there is no pending data, `Err(io::ErrorKind::WouldBlock)` is
     /// returned. This function is usually paired with `readable()`.
     pub fn try_read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.inner.get_mut().read(buf)
+        #[cfg(unix)]
+        {
+            self.inner.get_mut().read(buf)
+        }
+        #[cfg(windows)]
+        {
+            self.inner.try_read(buf)
+        }
     }
 
     /// Wait for the port to become readable.
@@ -154,7 +193,14 @@ impl SerialStream {
     /// When the write would block, `Err(io::ErrorKind::WouldBlock)` is
     /// returned. This function is usually paired with `writable()`.
     pub fn try_write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.inner.get_mut().write(buf)
+        #[cfg(unix)]
+        {
+            self.inner.get_mut().write(buf)
+        }
+        #[cfg(windows)]
+        {
+            self.inner.try_write(buf)
+        }
     }
 
     /// Wait for the port to become writable.
@@ -268,7 +314,8 @@ impl AsyncRead for SerialStream {
         cx: &mut Context<'_>,
         buf: &mut ReadBuf<'_>,
     ) -> Poll<io::Result<()>> {
-        Pin::new(&mut self.get_mut().inner).poll_read(cx, buf)
+        let mut self_ = self;
+        Pin::new(&mut self_.inner).poll_read(cx, buf)
     }
 }
 
@@ -279,47 +326,50 @@ impl AsyncWrite for SerialStream {
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<io::Result<usize>> {
-        Pin::new(&mut self.get_mut().inner).poll_write(cx, buf)
+        let mut self_ = self;
+        Pin::new(&mut self_.inner).poll_write(cx, buf)
     }
 
     fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        Pin::new(&mut self.get_mut().inner).poll_flush(cx)
+        let mut self_ = self;
+        Pin::new(&mut self_.inner).poll_flush(cx)
     }
 
     fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        Pin::new(&mut self.get_mut().inner).poll_shutdown(cx)
+        let mut self_ = self;
+        Pin::new(&mut self_.inner).poll_shutdown(cx)
     }
 }
 
 impl crate::SerialPort for SerialStream {
     #[inline(always)]
     fn name(&self) -> Option<String> {
-        self.inner.get_ref().name()
+        self.borrow().name()
     }
 
     #[inline(always)]
     fn baud_rate(&self) -> crate::Result<u32> {
-        self.inner.get_ref().baud_rate()
+        self.borrow().baud_rate()
     }
 
     #[inline(always)]
     fn data_bits(&self) -> crate::Result<crate::DataBits> {
-        self.inner.get_ref().data_bits()
+        self.borrow().data_bits()
     }
 
     #[inline(always)]
     fn flow_control(&self) -> crate::Result<crate::FlowControl> {
-        self.inner.get_ref().flow_control()
+        self.borrow().flow_control()
     }
 
     #[inline(always)]
     fn parity(&self) -> crate::Result<crate::Parity> {
-        self.inner.get_ref().parity()
+        self.borrow().parity()
     }
 
     #[inline(always)]
     fn stop_bits(&self) -> crate::Result<crate::StopBits> {
-        self.inner.get_ref().stop_bits()
+        self.borrow().stop_bits()
     }
 
     #[inline(always)]
@@ -329,27 +379,27 @@ impl crate::SerialPort for SerialStream {
 
     #[inline(always)]
     fn set_baud_rate(&mut self, baud_rate: u32) -> crate::Result<()> {
-        self.inner.get_mut().set_baud_rate(baud_rate)
+        self.borrow_mut().set_baud_rate(baud_rate)
     }
 
     #[inline(always)]
     fn set_data_bits(&mut self, data_bits: crate::DataBits) -> crate::Result<()> {
-        self.inner.get_mut().set_data_bits(data_bits)
+        self.borrow_mut().set_data_bits(data_bits)
     }
 
     #[inline(always)]
     fn set_flow_control(&mut self, flow_control: crate::FlowControl) -> crate::Result<()> {
-        self.inner.get_mut().set_flow_control(flow_control)
+        self.borrow_mut().set_flow_control(flow_control)
     }
 
     #[inline(always)]
     fn set_parity(&mut self, parity: crate::Parity) -> crate::Result<()> {
-        self.inner.get_mut().set_parity(parity)
+        self.borrow_mut().set_parity(parity)
     }
 
     #[inline(always)]
     fn set_stop_bits(&mut self, stop_bits: crate::StopBits) -> crate::Result<()> {
-        self.inner.get_mut().set_stop_bits(stop_bits)
+        self.borrow_mut().set_stop_bits(stop_bits)
     }
 
     #[inline(always)]
@@ -359,47 +409,47 @@ impl crate::SerialPort for SerialStream {
 
     #[inline(always)]
     fn write_request_to_send(&mut self, level: bool) -> crate::Result<()> {
-        self.inner.get_mut().write_request_to_send(level)
+        self.borrow_mut().write_request_to_send(level)
     }
 
     #[inline(always)]
     fn write_data_terminal_ready(&mut self, level: bool) -> crate::Result<()> {
-        self.inner.get_mut().write_data_terminal_ready(level)
+        self.borrow_mut().write_data_terminal_ready(level)
     }
 
     #[inline(always)]
     fn read_clear_to_send(&mut self) -> crate::Result<bool> {
-        self.inner.get_mut().read_clear_to_send()
+        self.borrow_mut().read_clear_to_send()
     }
 
     #[inline(always)]
     fn read_data_set_ready(&mut self) -> crate::Result<bool> {
-        self.inner.get_mut().read_data_set_ready()
+        self.borrow_mut().read_data_set_ready()
     }
 
     #[inline(always)]
     fn read_ring_indicator(&mut self) -> crate::Result<bool> {
-        self.inner.get_mut().read_ring_indicator()
+        self.borrow_mut().read_ring_indicator()
     }
 
     #[inline(always)]
     fn read_carrier_detect(&mut self) -> crate::Result<bool> {
-        self.inner.get_mut().read_carrier_detect()
+        self.borrow_mut().read_carrier_detect()
     }
 
     #[inline(always)]
     fn bytes_to_read(&self) -> crate::Result<u32> {
-        self.inner.get_ref().bytes_to_read()
+        self.borrow().bytes_to_read()
     }
 
     #[inline(always)]
     fn bytes_to_write(&self) -> crate::Result<u32> {
-        self.inner.get_ref().bytes_to_write()
+        self.borrow().bytes_to_write()
     }
 
     #[inline(always)]
     fn clear(&self, buffer_to_clear: crate::ClearBuffer) -> crate::Result<()> {
-        self.inner.get_ref().clear(buffer_to_clear)
+        self.borrow().clear(buffer_to_clear)
     }
 
     #[inline(always)]
@@ -412,12 +462,12 @@ impl crate::SerialPort for SerialStream {
 
     #[inline(always)]
     fn set_break(&self) -> crate::Result<()> {
-        self.inner.get_ref().set_break()
+        self.borrow().set_break()
     }
 
     #[inline(always)]
     fn clear_break(&self) -> crate::Result<()> {
-        self.inner.get_ref().clear_break()
+        self.borrow().clear_break()
     }
 }
 

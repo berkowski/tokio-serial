@@ -36,7 +36,7 @@ default-features = false
 optional = true
 
 [dependencies.mio-serial]
-version = "4.0.0-beta1"
+version = "4.0.0-beta2"
 default-features = false
 
 [dependencies.bytes]
@@ -58,3 +58,6 @@ winapi = { version = "0.3", features = ["commapi", "fileapi", "handleapi", "winb
 name = "serial_println"
 path = "examples/serial_println.rs"
 required-features = ["rt", "codec"]
+
+[patch.crates-io]
+mio-serial = {git = "https://github.com/berkowski/mio-serial"}
