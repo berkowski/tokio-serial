@@ -5,9 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
-[5.4.0-beta1] UNRELEASED
+[5.4.0-beta1] 2021-07-16
 
 Major release drawing in updates to `tokio` and `mio-serial` (and the upstream `serialport-rs`)
+
+### BREAKING CHANGES
+
+- Following `mio-serial`, added `tokio_serial::SerialStream` with platform specific requirements at compile time with `#[cfg()]`
+- Removed `SerialPortSettings`, `serialport-rs` now uses the builder pattern
+
+### Added
+- `SerialPortBuilderExt` extension trait for `serialport::SerialPortBuilder` to open a serial port in async mode
+- Re-exports of both `mio_serial::new` and `mio_serial::available_ports`
 
 ### Changed
 - Bumped [tokio](https://github.com/tokio-rs/tokio) to 1.0
