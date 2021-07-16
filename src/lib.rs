@@ -485,7 +485,7 @@ mod sys {
     use std::os::unix::io::{AsRawFd, RawFd};
     impl AsRawFd for SerialStream {
         fn as_raw_fd(&self) -> RawFd {
-            self.inner.get_ref().as_raw_fd()
+            self.inner.as_raw_fd()
         }
     }
 }
