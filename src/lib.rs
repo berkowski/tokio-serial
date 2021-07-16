@@ -10,7 +10,7 @@
 // Re-export serialport types and traits from mio_serial
 pub use mio_serial::{
     available_ports, new, ClearBuffer, DataBits, Error, ErrorKind, FlowControl, Parity, SerialPort,
-    SerialPortBuilder, StopBits,
+    SerialPortBuilder, SerialPortInfo, StopBits,
 };
 
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
