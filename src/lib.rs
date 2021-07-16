@@ -9,7 +9,7 @@
 
 // Re-export serialport types and traits from mio_serial
 pub use mio_serial::{
-    new, ClearBuffer, DataBits, Error, ErrorKind, FlowControl, Parity, SerialPort,
+    available_ports, new, ClearBuffer, DataBits, Error, ErrorKind, FlowControl, Parity, SerialPort,
     SerialPortBuilder, StopBits,
 };
 
