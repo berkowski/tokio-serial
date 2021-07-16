@@ -13,8 +13,7 @@ categories = ["asynchronous", "hardware-support"]
 edition = "2018"
 
 [badges]
-appveyor = { repository = "berkowski/tokio-serial", service = "github" }
-travis-ci = { repository = "berkowski/tokio-serial", service = "github" }
+maintenance = { status = "looking-for-maintainer" }
 
 [features]
 default = []
@@ -58,6 +57,3 @@ winapi = { version = "0.3", features = ["commapi", "fileapi", "handleapi", "winb
 name = "serial_println"
 path = "examples/serial_println.rs"
 required-features = ["rt", "codec"]
-
-[patch.crates-io]
-mio-serial = {git = "https://github.com/berkowski/mio-serial"}

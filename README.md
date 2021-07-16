@@ -3,7 +3,7 @@
 An implementation of  serialport I/O for Tokio, an async framework for rust.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ti6xr89klsnq5l9a/branch/master?svg=true)](https://ci.appveyor.com/project/berkowski/tokio-serial/branch/master)
-[![crates.io](http://meritbadge.herokuapp.com/tokio-serial)](https://crates.io/crates/tokio-serial)
+[![crates.io](http://shields.io/crates/v/tokio-serial)](https://crates.io/crates/tokio-serial)
 [![docs.rs](https://docs.rs/tokio-serial/badge.svg)](https://docs.rs/tokio-serial)
 
 
