@@ -15,7 +15,7 @@ Major release drawing in updates to `tokio` and `mio-serial` (and the upstream `
 
 ### Contributions
 - [#35](https://github.com/berkowski/tokio-serial/pull/35) by [georgmu](https://github.com/georgmu) found an early bug in the AsyncRead trait impl
-- [#39](https://github.com/berkowski/tokio-serial/pull/39) by [ColinFinck](https://github.com/ColinFinck) took it upon himself to push windows support for Tokio 1.X
+- [#39](https://github.com/berkowski/tokio-serial/pull/39) and [#41](https://github.com/berkowski/tokio-serial/pull/41) by [ColinFinck](https://github.com/ColinFinck) took it upon himself to push windows support for Tokio 1.X
   and did the vast majority of the initial work and paved the way
   
 ## [4.3.3] 2019-11-24
