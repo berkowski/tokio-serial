@@ -17,11 +17,7 @@ Add `tokio-serial` to you `Cargo.toml`:
 
 ```toml
 [dependencies]
-# For latest version using tokio 0.2 alpha
-tokio-serial = "4.3.3-tokio-0.2.0-alpha.6"
-
-# For version using tokio 0.1
-tokio-serial = "3.3.0"
+tokio-serial = "5.4.0-beta1"
 ```
 
 ## Resources
