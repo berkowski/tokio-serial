@@ -16,45 +16,26 @@ edition = "2018"
 appveyor = { repository = "berkowski/tokio-serial", service = "github" }
 travis-ci = { repository = "berkowski/tokio-serial", service = "github" }
 
+[dependencies]
+bytes = { version = "1", default-features = false, optional = true }
+futures = "0.3"
+mio-serial = { version = "4.0.0-beta2", default-features = false }
+tokio = { version = "1.8.1", default-features = false, features = ["net"] }
+tokio-util = { version = "0.6", default-features = false, optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.8.1", default-features = false, features = ["macros"] }
+
 [features]
 default = []
+codec = ["bytes", "tokio-util/codec"]
 libudev = ["mio-serial/libudev"]
 rt = ["tokio/rt-multi-thread"]
-codec = ["tokio-util/codec", "bytes"]
-
-[dependencies.futures]
-version = "0.3"
-
-[dependencies.tokio]
-version = "1.8.1"
-default-features = false
-features = ["net"]
-
-[dependencies.tokio-util]
-version = "0.6"
-default-features = false
-optional = true
-
-[dependencies.mio-serial]
-version = "4.0.0-beta1"
-default-features = false
-
-[dependencies.bytes]
-version = "1"
-default-features = false
-optional = true
-
-[dev-dependencies.tokio]
-version = "1.8.1"
-features = ["macros"]
-default-features = false
-
-[target.'cfg(windows)'.dependencies]
-serialport = { version = "4", default-features = false }
-winapi = { version = "0.3", features = ["commapi", "fileapi", "handleapi", "winbase", "winnt"] }
-
 
 [[example]]
 name = "serial_println"
 path = "examples/serial_println.rs"
 required-features = ["rt", "codec"]
+
+[patch.crates-io]
+mio-serial = { git = "https://github.com/berkowski/mio-serial" }
