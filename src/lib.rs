@@ -55,6 +55,11 @@ pub type Result<T> = mio_serial::Result<T>;
 pub struct SerialStream {
     #[cfg(unix)]
     inner: AsyncFd<mio_serial::SerialStream>,
+    // Named pipes and COM ports are actually two entirely different things that hardly have anything in common.
+    // The only thing they share is the opaque `HANDLE` type that can be fed into `CreateFileW`, `ReadFile`, `WriteFile`, etc.
+    //
+    // Both `mio` and `tokio` don't yet have any code to work on arbitrary HANDLEs.
+    // But they have code for dealing with named pipes, and we (ab)use that here to work on COM ports.
     #[cfg(windows)]
     inner: named_pipe::NamedPipeClient,
     // The com port is kept around for serialport related methods
