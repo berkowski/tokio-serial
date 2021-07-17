@@ -48,10 +48,6 @@ version = "1.8.1"
 features = ["macros"]
 default-features = false
 
-[target.'cfg(windows)'.dependencies]
-serialport = { version = "4", default-features = false }
-winapi = { version = "0.3", features = ["commapi", "fileapi", "handleapi", "winbase", "winnt"] }
-
 
 [[example]]
 name = "serial_println"
