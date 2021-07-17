@@ -500,24 +500,19 @@ mod io {
         }
     }
 }
-//
-//
-//
+
 /// An extension trait for serialport::SerialPortBuilder
 ///
-/// This trait adds two methods to SerialPortBuilder:
+/// This trait adds one method to SerialPortBuilder:
 ///
 /// - open_async
-/// - open_native_async
 ///
 /// These methods mirror the `open` and `open_native` methods of SerialPortBuilder
 pub trait SerialPortBuilderExt {
-    // /// Open a cross-platform interface to the port with the specified settings
-    // fn open_async(self) -> Result<Box<dyn MioSerialPort>>;
-
     /// Open a platform-specific interface to the port with the specified settings
     fn open_async(self) -> Result<SerialStream>;
 }
+
 impl SerialPortBuilderExt for SerialPortBuilder {
     /// Open a platform-specific interface to the port with the specified settings
     fn open_async(self) -> Result<SerialStream> {
