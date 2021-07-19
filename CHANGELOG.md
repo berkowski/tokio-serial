@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Renamed `SerialPortBuilderExt::open_async` to `SerialPortBuilderExt::open_native_async` to reflect the original
   intention
+- [@drbrain](https://github.com/drbrain) fixed formatting issues with this changelog in [#43](https://github.com/berkowski/tokio-serial/pull/43)
 
 ## [5.4.0-beta1] 2021-07-16
 
