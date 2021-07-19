@@ -1,0 +1,50 @@
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 8 15 * *'
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - beta
+          - nightly
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v1
+      - name: install socat
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install socat -y
+          socat -V
+      - name: install socat
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          brew install socat
+          socat -V
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+      - name: cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: -j1 -- --test-threads=1
+      - name: check format
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
