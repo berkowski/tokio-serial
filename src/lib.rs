@@ -55,6 +55,11 @@ pub type Result<T> = mio_serial::Result<T>;
 pub struct SerialStream {
     #[cfg(unix)]
     inner: AsyncFd<mio_serial::SerialStream>,
+    // Named pipes and COM ports are actually two entirely different things that hardly have anything in common.
+    // The only thing they share is the opaque `HANDLE` type that can be fed into `CreateFileW`, `ReadFile`, `WriteFile`, etc.
+    //
+    // Both `mio` and `tokio` don't yet have any code to work on arbitrary HANDLEs.
+    // But they have code for dealing with named pipes, and we (ab)use that here to work on COM ports.
     #[cfg(windows)]
     inner: named_pipe::NamedPipeClient,
     // The com port is kept around for serialport related methods
@@ -500,27 +505,22 @@ mod io {
         }
     }
 }
-//
-//
-//
+
 /// An extension trait for serialport::SerialPortBuilder
 ///
-/// This trait adds two methods to SerialPortBuilder:
+/// This trait adds one method to SerialPortBuilder:
 ///
-/// - open_async
 /// - open_native_async
 ///
-/// These methods mirror the `open` and `open_native` methods of SerialPortBuilder
+/// This method mirrors the `open_native` method of SerialPortBuilder
 pub trait SerialPortBuilderExt {
-    // /// Open a cross-platform interface to the port with the specified settings
-    // fn open_async(self) -> Result<Box<dyn MioSerialPort>>;
-
     /// Open a platform-specific interface to the port with the specified settings
-    fn open_async(self) -> Result<SerialStream>;
+    fn open_native_async(self) -> Result<SerialStream>;
 }
+
 impl SerialPortBuilderExt for SerialPortBuilder {
     /// Open a platform-specific interface to the port with the specified settings
-    fn open_async(self) -> Result<SerialStream> {
+    fn open_native_async(self) -> Result<SerialStream> {
         SerialStream::open(&self)
     }
 }
