@@ -10,11 +10,11 @@ jobs:
       matrix:
         rust:
           - stable
-          - beta
-          - nightly
+          # - beta
+          # - nightly
         os:
-          - macos-latest
-          - ubuntu-latest
+          # - macos-latest
+          # - ubuntu-latest
           - windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -38,6 +38,19 @@ jobs:
           socat -V
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: ${{ runner.os == 'Windows' }}
+      - name: install com0com
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          CertMgr.exe /add com0com.cer /s /r localMachine root
+          CertMgr.exe /add com0com.cer /s /r localMachine trustedpublisher
+          .\setup_com0com_W7_x64_signed.exe /S
+        working-directory: .github
+      - name: setup com0com
+        if: ${{ runner.os == 'Windows' }}
+        run: .\setupc.exe install PortName=COM10,EmuBR=yes PortName=COM11,EmuBR=yes
+        working-directory: C:\Program Files (x86)\com0com
       - name: cargo test
         uses: actions-rs/cargo@v1
         with:
