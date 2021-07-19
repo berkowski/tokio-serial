@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on http://keepachangelog.com/[Keep a Changelog]
 and this project adheres to http://semver.org/[Semantic Versioning].
 
-[5.4.0-beta1] 2021-07-16
+## [5.4.0-beta2] UNRELEASED
+
+### Changed
+- Renamed `SerialPortBuilderExt::open_async` to `SerialPortBuilderExt::open_native_async` to reflect the original
+  intention
+
+## [5.4.0-beta1] 2021-07-16
 
 Major release drawing in updates to `tokio` and `mio-serial` (and the upstream `serialport-rs`)
 
