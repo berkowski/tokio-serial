@@ -10,7 +10,7 @@ jobs:
       matrix:
         rust:
           - stable
-          # - beta
+          - beta
           # - nightly
     env:
       TEST_PORT_A: /tmp/ttyS10
@@ -49,7 +49,7 @@ jobs:
       matrix:
         rust:
           - stable
-          # - beta
+          - beta
           # - nightly
     env:
       TEST_PORT_A: /tmp/ttyS10
@@ -89,7 +89,7 @@ jobs:
       matrix:
         rust:
           - stable
-          # - beta
+          - beta
           # - nightly
     env:
       TEST_PORT_A: COM10
