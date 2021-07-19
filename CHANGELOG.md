@@ -2,8 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on http://keepachangelog.com/[Keep a Changelog]
-and this project adheres to http://semver.org/[Semantic Versioning].
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [5.4.0-beta2] UNRELEASED
 
@@ -80,8 +80,8 @@ Major release drawing in updates to `tokio` and `mio-serial` (and the upstream `
 
 ## [0.8.0] - 2018-04-27
 ### changed
-* Migrated to tokio 0.1 with https://github.com/berkowski/tokio-serial/pull/9[#9] and
-  https://github.com/berkowski/tokio-serial/pull/10[#10] Thanks, https://github.com/lnicola[lnicola]!
+* Migrated to tokio 0.1 with [#9](https://github.com/berkowski/tokio-serial/pull/9) and
+  [#10](https://github.com/berkowski/tokio-serial/pull/10) Thanks, [lnicola](https://github.com/lnicola)!
 * Bumped `mio-serial` dependency to 0.8
 
 ## [0.7.0] - UNRELEASED
@@ -103,8 +103,8 @@ Major release drawing in updates to `tokio` and `mio-serial` (and the upstream `
 ## [0.5.0] - 2017-05-18
 ### added
 * Added `trust` CI
-* https://github.com/berkowski/tokio-serial/pull/1[#1] provided `AsyncRead` and
-  `AsyncWrite` impls.  Thanks https://github.com/lexxvir[lexxvir]!
+* [#1](https://github.com/berkowski/tokio-serial/pull/1) provided `AsyncRead` and
+  `AsyncWrite` impls.  Thanks [lexxvir](https://github.com/lexxvir)!
 
 ### changed
 * Bumped `mio-serial` dependency to 0.5  Future releases will
