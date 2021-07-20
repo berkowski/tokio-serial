@@ -5,80 +5,84 @@ use tokio::{
 };
 use tokio_serial::SerialPortBuilderExt;
 
-struct SocatFixture {
+#[cfg(unix)]
+const DEFAULT_TEST_PORT_NAMES: &str = "/dev/ttyUSB0;/dev/ttyUSB1";
+#[cfg(not(unix))]
+const DEFAULT_TEST_PORT_NAMES: &str = "COM10;COM11";
+
+struct Fixture {
+    #[cfg(unix)]
     process: process::Child,
-    port_a: String,
-    port_b: String,
+    pub port_a: &'static str,
+    pub port_b: &'static str,
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(unix)] {
-        const DEFAULT_TEST_PORT_NAMES: &str = "/dev/ttyUSB0;/dev/ttyUSB1";
-    }
-    else {
-        const DEFAULT_TEST_PORT_NAMES: &str = "COM10;COM11";
-    }
-}
-
-impl Drop for SocatFixture {
+#[cfg(unix)]
+impl Drop for Fixture {
     fn drop(&mut self) {
         if let Some(id) = self.process.id() {
             log::trace!("stopping socat process (id: {})...", id);
+
             self.process.start_kill().ok();
             std::thread::sleep(Duration::from_millis(250));
-            log::trace!("removing link: {}", self.port_a.as_str());
-            std::fs::remove_file(self.port_a.as_str()).ok();
-            log::trace!("removing link: {}", self.port_b.as_str());
-            std::fs::remove_file(self.port_b.as_str()).ok();
+            log::trace!("removing link: {}", self.port_a);
+            std::fs::remove_file(self.port_a).ok();
+            log::trace!("removing link: {}", self.port_b);
+            std::fs::remove_file(self.port_b).ok();
         }
     }
 }
 
-impl SocatFixture {
-    pub async fn new(port_a: &str, port_b: &str) -> Self {
+impl Fixture {
+    #[cfg(unix)]
+    pub async fn new(port_a: &'static str, port_b: &'static str) -> Self {
         let args = [
             format!("PTY,link={}", port_a),
             format!("PTY,link={}", port_b),
         ];
         log::trace!("starting process: socat {} {}", args[0], args[1]);
 
-        let child = process::Command::new("socat")
+        let process = process::Command::new("socat")
             .args(&args)
             .spawn()
             .expect("unable to spawn socat process");
-        log::trace!(".... done! (pid: {:?})", child.id().unwrap());
+        log::trace!(".... done! (pid: {:?})", process.id().unwrap());
 
         time::sleep(Duration::from_millis(500)).await;
 
         Self {
-            process: child,
-            port_a: port_a.to_owned(),
-            port_b: port_b.to_owned(),
+            process,
+            port_a,
+            port_b,
         }
     }
+
+    #[cfg(not(unix))]
+    pub async fn new(port_a: &'static str, port_b: &'static str) -> Self {
+        Self { port_a, port_b }
+    }
+}
+
+async fn setup_virtual_serial_ports() -> Fixture {
+    let port_names: Vec<&str> = std::option_env!("TEST_PORT_NAMES")
+        .unwrap_or(DEFAULT_TEST_PORT_NAMES)
+        .split(';')
+        .collect();
+
+    assert_eq!(port_names.len(), 2);
+    Fixture::new(port_names[0], port_names[1]).await
 }
 
 #[tokio::test]
 async fn send_recv() {
     env_logger::init();
 
-    let port_names: Vec<&str> = std::option_env!("TEST_PORT_NAMES")
-        .unwrap_or(DEFAULT_TEST_PORT_NAMES)
-        .split(';')
-        .collect();
+    let fixture = setup_virtual_serial_ports().await;
 
-    let port_a = port_names[0];
-    let port_b = port_names[1];
-
-    assert_eq!(port_names.len(), 2, "expected two port names");
-
-    #[cfg(unix)]
-    let _fixture = SocatFixture::new(port_a, port_b).await;
-
-    let mut sender = tokio_serial::new(port_a, 9600)
+    let mut sender = tokio_serial::new(fixture.port_a, 9600)
         .open_native_async()
         .expect("unable to open serial port");
-    let mut receiver = tokio_serial::new(port_b, 9600)
+    let mut receiver = tokio_serial::new(fixture.port_b, 9600)
         .open_native_async()
         .expect("unable to open serial port");
 
