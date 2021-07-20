@@ -99,11 +99,4 @@ async fn send_recv() {
 
     log::trace!("checking test message");
     assert_eq!(&buf[..n], message);
-
-    mem::drop(fixture);
-
-    log::trace!("removing /tmp/ttyS10");
-    fs::remove_file("/tmp/ttyS10").await.ok();
-    log::trace!("removing /tmp/ttyS11");
-    fs::remove_file("/tmp/ttyS11").await.ok();
 }

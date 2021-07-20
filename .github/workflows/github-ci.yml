@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 8 15 * *'
 jobs:
-  ci-linux:
+  cargo-test-linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -15,6 +15,7 @@ jobs:
     env:
       TEST_PORT_A: /tmp/ttyS10
       TEST_PORT_B: /tmp/ttyS11
+      RUST_LOG: trace
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -33,17 +34,7 @@ jobs:
         run: cargo test -j1 -- --test-threads=1
         env:
           TEST_PORT_NAMES: ${{ env.TEST_PORT_A }};${{ env.TEST_PORT_B }}
-      - name: cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
-      - name: check format
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
-  ci-macOS:
+  cargo-test-macOS:
     runs-on: macos-latest
     strategy:
       matrix:
@@ -54,6 +45,7 @@ jobs:
     env:
       TEST_PORT_A: /tmp/ttyS10
       TEST_PORT_B: /tmp/ttyS11
+      RUST_LOG: trace
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -73,17 +65,7 @@ jobs:
         run: cargo test -j1 -- --test-threads=1
         env:
           TEST_PORT_NAMES: ${{ env.TEST_PORT_A }};${{ env.TEST_PORT_B }}
-      - name: cargo clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
-      - name: check format
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
-  ci-windows:
+  cargo-test-windows:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -94,6 +76,7 @@ jobs:
     env:
       TEST_PORT_A: COM10
       TEST_PORT_B: COM11
+      RUST_LOG: trace
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -117,13 +100,49 @@ jobs:
         run: cargo test -j1 -- --test-threads=1
         env:
           TEST_PORT_NAMES: ${{ env.TEST_PORT_A }};${{ env.TEST_PORT_B }}
-      - name: cargo clippy
-        uses: actions-rs/cargo@v1
+  cargo-fmt:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        rust:
+          - stable
+        os:
+          - ubuntu-latest
+          - windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
         with:
-          command: clippy
-          args: -- -D warnings
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v1
       - name: check format
         uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: -- --check
+  cargo-clippy:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        rust:
+          - stable
+        os:
+          - ubuntu-latest
+          - windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v1
+      - name: cargo clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
