@@ -43,11 +43,19 @@ version = "1"
 default-features = false
 optional = true
 
+[dependencies.log]
+version = "0.4"
+
+[dependencies.cfg-if]
+version = "1"
+
 [dev-dependencies.tokio]
 version = "1.8.1"
-features = ["macros"]
+features = ["macros", "rt", "process", "time", "fs", "io-util"]
 default-features = false
 
+[dev-dependencies.env_logger]
+version = "0.9.0"
 
 [[example]]
 name = "serial_println"
