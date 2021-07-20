@@ -1,6 +1,5 @@
-use std::{mem, time::Duration};
+use std::time::Duration;
 use tokio::{
-    fs,
     io::{AsyncReadExt, AsyncWriteExt},
     process, time,
 };
@@ -74,7 +73,7 @@ async fn send_recv() {
     assert_eq!(port_names.len(), 2, "expected two port names");
 
     #[cfg(unix)]
-    let fixture = SocatFixture::new(port_a, port_b).await;
+    let _fixture = SocatFixture::new(port_a, port_b).await;
 
     let mut sender = tokio_serial::new(port_a, 9600)
         .open_native_async()
@@ -86,14 +85,14 @@ async fn send_recv() {
     log::trace!("sending test message");
     let message = b"This is a test message";
     sender
-        .write(message)
+        .write_all(message)
         .await
         .expect("unable to write test message");
 
     log::trace!("receiving test message");
     let mut buf = [0u8; 32];
     let n = receiver
-        .read(&mut buf[..])
+        .read_exact(&mut buf[..message.len()])
         .await
         .expect("unable to read test message");
 
