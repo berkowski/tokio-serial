@@ -17,9 +17,26 @@ Add `tokio-serial` to you `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokio-serial = "5.4.0-beta1"
+tokio-serial = "5.4.0-beta2"
 ```
 
+## Tests
+Useful tests for serial ports require... serial ports, and serial ports are not often provided by online CI providers.
+As so, automated build testing are really only check whether the code compiles, not whether it works.
+
+Integration tests are in the `tests/` directory and typically require two serial ports to run.
+The names of the serial ports can be configured at run time by setting the `TEST_PORT_NAMES` environment variable
+to a semi-colon delimited string with the two serial port names.  The default values are:
+
+- For Unix: `TEST_PORT_NAMES=/dev/ttyUSB0;/dev/ttyUSB1`
+- For Windows: `TEST_PORT_NAMES=COM1;COM2`
+
+**IMPORTANT** To prevent multiple tests from talking to the same ports at the same time make sure to limit the number
+of test threads to 1 using:
+
+```sh
+cargo test -j1 -- --test-threads=1
+```
 ## Resources
 
 [tokio.rs](https://tokio.rs)
