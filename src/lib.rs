@@ -449,10 +449,14 @@ impl crate::SerialPort for SerialStream {
         self.borrow().clear(buffer_to_clear)
     }
 
+    /// Cloning SerialStream is not supported.
+    ///
+    /// # Errors
+    /// Always returns `ErrorKind::Unsupported`
     #[inline(always)]
     fn try_clone(&self) -> crate::Result<Box<dyn crate::SerialPort>> {
         Err(crate::Error::new(
-            crate::ErrorKind::Io(std::io::ErrorKind::Other),
+            crate::ErrorKind::Io(std::io::ErrorKind::Unsupported),
             "Cannot clone Tokio handles",
         ))
     }
