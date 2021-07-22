@@ -25,7 +25,7 @@ codec = ["tokio-util/codec", "bytes"]
 version = "0.3"
 
 [dependencies.tokio]
-version = "1.8.1"
+version = "^1.8"
 default-features = false
 features = ["net"]
 
@@ -50,7 +50,7 @@ version = "0.4"
 version = "1"
 
 [dev-dependencies.tokio]
-version = "1.8.1"
+version = "^1.8"
 features = ["macros", "rt", "process", "time", "fs", "io-util"]
 default-features = false
 
