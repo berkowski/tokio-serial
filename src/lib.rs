@@ -452,7 +452,7 @@ impl crate::SerialPort for SerialStream {
     /// Cloning SerialStream is not supported.
     ///
     /// # Errors
-    /// Always returns `ErrorKind::Unsupported`
+    /// Always returns `ErrorKind::Other` with a message.
     #[inline(always)]
     fn try_clone(&self) -> crate::Result<Box<dyn crate::SerialPort>> {
         Err(crate::Error::new(
