@@ -25,7 +25,7 @@ Add `tokio-serial` to you `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokio-serial = "5.4.0-beta3"
+tokio-serial = "5.4.0-beta4"
 ```
 
 ## Tests

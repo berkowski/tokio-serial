@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.4.0-beta4] 2021-07-23
+
+### Changed
+- [#46](https://github.com/berkowski/tokio-serial/pull/46) [@ColinFinck](https://github.com/ColinFinck) fixed some docs.
+
 ## [5.4.0-beta3] 2021-07-23
 
 ### Added
