@@ -1,6 +1,6 @@
 [package]
 name = "tokio-serial"
-version = "5.4.0-beta2"
+version = "5.4.0-beta3"
 authors = ["Zac Berkowitz <zac.berkowitz@gmail.com>"]
 description = "A serial port implementation for tokio"
 license = "MIT"
@@ -11,6 +11,9 @@ readme = "README.md"
 keywords = ["rs232", "serial", "tokio"]
 categories = ["asynchronous", "hardware-support"]
 edition = "2018"
+
+[package.metadata]
+msrv = "1.41.0"
 
 [badges]
 maintenance = { status = "looking-for-maintainer" }
@@ -35,7 +38,7 @@ default-features = false
 optional = true
 
 [dependencies.mio-serial]
-version = "4.0.0-beta3"
+version = "4.0.0-beta4"
 default-features = false
 
 [dependencies.bytes]

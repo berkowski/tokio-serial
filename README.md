@@ -1,15 +1,23 @@
+[![Crates.io][crates-badge]][crates-url]
+[![MIT licensed][mit-badge]][mit-url]
+[![Build Status][actions-badge]][actions-url]
+
+[crates-badge]: https://img.shields.io/crates/v/tokio-serial.svg
+[crates-url]: https://crates.io/crates/tokio-serial
+[mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[mit-url]: https://github.com/berkowski/tokio-serial/blob/master/LICENSE
+[actions-badge]: https://github.com/berkowski/tokio-serial/actions/workflows/github-ci.yml/badge.svg
+[actions-url]: https://github.com/berkowski/tokio-serial/actions?query=workflow%3Agithub-ci+branch%3Amaster
 # tokio-serial
 
 An implementation of  serialport I/O for Tokio, an async framework for rust.
 
-[![Build status](https://github.com/berkowski/tokio-serial/actions/workflows/github-ci.yml/badge.svg)](https://github.com/berkowski/tokio-serial/actions)
-[![crates.io](http://shields.io/crates/v/tokio-serial)](https://crates.io/crates/tokio-serial)
-[![docs.rs](https://docs.rs/tokio-serial/badge.svg)](https://docs.rs/tokio-serial)
-
-
 ## NOTICE
 This crate is no longer actively maintained (see [#40](https://github.com/berkowski/tokio-serial/issues/40)) and is
 open for adoption.  Create an issue if interested.
+
+## MSRV
+The Minimum Supported Rust Version is **1.43.0** as found using [cargo-msrv](https://crates.io/crates/cargo-msrv)
 
 ## Usage
 
@@ -17,7 +25,7 @@ Add `tokio-serial` to you `Cargo.toml`:
 
 ```toml
 [dependencies]
-tokio-serial = "5.4.0-beta2"
+tokio-serial = "5.4.0-beta3"
 ```
 
 ## Tests

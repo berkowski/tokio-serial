@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.4.0-beta3] 2021-07-23
+
+### Added
+- Check in CI tests for building against the MSRV (currently `1.43.0`)
+
+### Changed
+- Bumped [mio-serial](https://github.com/berkowski/mio-serial) to 4.0.0-beta4
+
 ## [5.4.0-beta2] 2021-07-22
 
 ### Changed
