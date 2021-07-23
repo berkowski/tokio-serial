@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Bumped [mio-serial](https://github.com/berkowski/mio-serial) to 4.0.0-beta4
+- [#45](https://github.com/berkowski/tokio-serial/pull/45) [@ColinFinck](https://github.com/ColinFinck) fixed the example.
 
 ## [5.4.0-beta2] 2021-07-22
 
