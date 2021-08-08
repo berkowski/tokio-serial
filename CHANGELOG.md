@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.4.1] 2021-08-08
+Minor update to README.md
+
+### Changed
+- version of tokio-serial indicated in README.md example.
+
 ## [5.4.0] 2021-08-08
 Final release of version 5.4.  No code changes besides bumping `mio-serial` to 5.0 since the
 previous 5.4.0-beta4.
