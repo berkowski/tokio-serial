@@ -13,7 +13,7 @@
 An implementation of  serialport I/O for Tokio, an async framework for rust.
 
 ## MSRV
-The Minimum Supported Rust Version is **1.43.0** as found using [cargo-msrv](https://crates.io/crates/cargo-msrv)
+The Minimum Supported Rust Version is **1.46.0** as found using [cargo-msrv](https://crates.io/crates/cargo-msrv)
 
 ## Usage
 
