@@ -12,10 +12,6 @@
 
 An implementation of  serialport I/O for Tokio, an async framework for rust.
 
-## NOTICE
-This crate is no longer actively maintained (see [#40](https://github.com/berkowski/tokio-serial/issues/40)) and is
-open for adoption.  Create an issue if interested.
-
 ## MSRV
 The Minimum Supported Rust Version is **1.43.0** as found using [cargo-msrv](https://crates.io/crates/cargo-msrv)
 
