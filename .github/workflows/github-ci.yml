@@ -12,7 +12,7 @@ jobs:
         rust:
           - stable
           - beta
-          - 1.43.0
+          - 1.46.0
           # - nightly
     env:
       TEST_PORT_A: /tmp/ttyS10
@@ -43,7 +43,7 @@ jobs:
         rust:
           - stable
           - beta
-          - 1.43.0
+          - 1.46.0
           # - nightly
     env:
       TEST_PORT_A: /tmp/ttyS10
@@ -81,7 +81,7 @@ jobs:
         rust:
           - stable
           - beta
-          - 1.43.0
+          - 1.46.0
           # - nightly
     env:
       TEST_PORT_A: COM10

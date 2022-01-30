@@ -13,10 +13,7 @@ categories = ["asynchronous", "hardware-support"]
 edition = "2018"
 
 [package.metadata]
-msrv = "1.41.0"
-
-[badges]
-maintenance = { status = "looking-for-maintainer" }
+msrv = "1.46.0"
 
 [features]
 default = []
