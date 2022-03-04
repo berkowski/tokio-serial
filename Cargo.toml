@@ -1,6 +1,6 @@
 [package]
 name = "tokio-serial"
-version = "5.4.1"
+version = "5.4.2"
 authors = ["Zac Berkowitz <zac.berkowitz@gmail.com>"]
 description = "A serial port implementation for tokio"
 license = "MIT"
@@ -30,7 +30,7 @@ default-features = false
 features = ["net"]
 
 [dependencies.tokio-util]
-version = "0.6"
+version = "0.7"
 default-features = false
 optional = true
 
