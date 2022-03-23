@@ -35,7 +35,7 @@ default-features = false
 optional = true
 
 [dependencies.mio-serial]
-version = "5"
+version = "5.0.2"
 default-features = false
 
 [dependencies.bytes]
