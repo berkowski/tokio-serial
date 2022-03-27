@@ -1,6 +1,6 @@
 [package]
 name = "tokio-serial"
-version = "5.4.2"
+version = "5.4.3"
 authors = ["Zac Berkowitz <zac.berkowitz@gmail.com>"]
 description = "A serial port implementation for tokio"
 license = "MIT"
@@ -35,7 +35,7 @@ default-features = false
 optional = true
 
 [dependencies.mio-serial]
-version = "5"
+version = "5.0.2"
 default-features = false
 
 [dependencies.bytes]
