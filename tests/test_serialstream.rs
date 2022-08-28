@@ -6,7 +6,12 @@ use tokio::{
 use tokio_serial::SerialPortBuilderExt;
 
 #[cfg(unix)]
-const DEFAULT_TEST_PORT_NAMES: &str = "/dev/ttyUSB0;/dev/ttyUSB1";
+const DEFAULT_TEST_PORT_NAMES: &str = concat!(
+    env!("CARGO_TARGET_TMPDIR"),
+    "/ttyUSB0;",
+    env!("CARGO_TARGET_TMPDIR"),
+    "/ttyUSB1"
+);
 #[cfg(not(unix))]
 const DEFAULT_TEST_PORT_NAMES: &str = "COM10;COM11";
 
