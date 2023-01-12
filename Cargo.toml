@@ -55,7 +55,7 @@ features = ["macros", "rt", "process", "time", "fs", "io-util"]
 default-features = false
 
 [dev-dependencies.env_logger]
-version = "0.9.0"
+version = "0.10.0"
 
 [[example]]
 name = "serial_println"
