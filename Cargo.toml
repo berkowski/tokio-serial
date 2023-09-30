@@ -15,6 +15,9 @@ edition = "2018"
 [package.metadata]
 msrv = "1.46.0"
 
+[package.metadata.docs.rs]
+features = ["codec"]
+
 [features]
 default = []
 libudev = ["mio-serial/libudev"]
