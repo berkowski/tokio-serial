@@ -23,6 +23,7 @@ default = []
 libudev = ["mio-serial/libudev"]
 rt = ["tokio/rt-multi-thread"]
 codec = ["tokio-util/codec", "tokio-util/io", "bytes"]
+serde = ["mio-serial/serde"]
 
 [dependencies.futures]
 version = "0.3"
