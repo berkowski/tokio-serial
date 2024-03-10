@@ -49,6 +49,10 @@ version = "0.4"
 [dependencies.cfg-if]
 version = "1"
 
+[dependencies.serialport]
+version = "4"
+default-features = false
+
 [dev-dependencies.tokio]
 version = "^1.8"
 features = ["macros", "rt", "process", "time", "fs", "io-util"]

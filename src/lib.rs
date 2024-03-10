@@ -15,6 +15,7 @@ pub use mio_serial::{
 
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
+use std::convert::TryFrom;
 use std::io::{Read, Result as IoResult, Write};
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -485,6 +486,18 @@ impl Write for SerialStream {
 
     fn flush(&mut self) -> IoResult<()> {
         self.borrow_mut().flush()
+    }
+}
+
+#[cfg(unix)]
+impl TryFrom<serialport::TTYPort> for SerialStream {
+    type Error = Error;
+
+    fn try_from(value: serialport::TTYPort) -> std::result::Result<Self, Self::Error> {
+        let port = mio_serial::SerialStream::try_from(value)?;
+        Ok(Self {
+            inner: AsyncFd::new(port)?,
+        })
     }
 }
 
