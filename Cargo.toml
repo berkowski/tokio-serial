@@ -10,7 +10,7 @@ documentation = "http://docs.rs/tokio-serial"
 readme = "README.md"
 keywords = ["rs232", "serial", "tokio"]
 categories = ["asynchronous", "hardware-support"]
-edition = "2018"
+edition = "2021"
 
 [package.metadata]
 msrv = "1.46.0"
