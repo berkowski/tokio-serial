@@ -137,7 +137,7 @@ impl SerialStream {
         self.inner.get_ref().exclusive()
     }
 
-    /// Borrow a reference to the underlying mio-serial::SerialStream object.
+    /// Borrow a reference to the underlying [`mio_serial::SerialStream`] object.
     #[inline(always)]
     fn borrow(&self) -> &mio_serial::SerialStream {
         #[cfg(unix)]
@@ -150,7 +150,7 @@ impl SerialStream {
         }
     }
 
-    /// Borrow a mutable reference to the underlying mio-serial::SerialStream object.
+    /// Borrow a mutable reference to the underlying [`mio_serial::SerialStream`] object.
     #[inline(always)]
     fn borrow_mut(&mut self) -> &mut mio_serial::SerialStream {
         #[cfg(unix)]
@@ -449,7 +449,7 @@ impl crate::SerialPort for SerialStream {
         self.borrow().clear(buffer_to_clear)
     }
 
-    /// Cloning SerialStream is not supported.
+    /// Cloning [`SerialStream`] is not supported.
     ///
     /// # Errors
     /// Always returns `ErrorKind::Other` with a message.
@@ -510,13 +510,13 @@ mod io {
     }
 }
 
-/// An extension trait for serialport::SerialPortBuilder
+/// An extension trait for [`SerialPortBuilder`].
 ///
-/// This trait adds one method to SerialPortBuilder:
+/// This trait adds one method to [`SerialPortBuilder`]:
 ///
-/// - open_native_async
+/// - `open_native_async`
 ///
-/// This method mirrors the `open_native` method of SerialPortBuilder
+/// This method mirrors the `open_native` method of [`SerialPortBuilder`]
 pub trait SerialPortBuilderExt {
     /// Open a platform-specific interface to the port with the specified settings
     fn open_native_async(self) -> Result<SerialStream>;

@@ -120,7 +120,7 @@ impl<I, C: Encoder<I> + Unpin> Sink<I> for SerialFramed<C> {
         } = *self;
 
         let pinned = Pin::new(port);
-        let n = ready!(pinned.poll_write(cx, &wr))?;
+        let n = ready!(pinned.poll_write(cx, wr))?;
 
         let wrote_all = n == self.wr.len();
         self.wr.clear();

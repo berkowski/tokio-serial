@@ -54,7 +54,7 @@ async fn main() -> tokio_serial::Result<()> {
 
     while let Some(line_result) = reader.next().await {
         let line = line_result.expect("Failed to read line");
-        println!("{}", line);
+        println!("{line}");
     }
     Ok(())
 }
