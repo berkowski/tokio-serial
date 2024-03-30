@@ -15,6 +15,9 @@ edition = "2018"
 [package.metadata]
 msrv = "1.46.0"
 
+[patch.crates-io]
+mio-serial = { git = "https://github.com/barafael/mio-serial.git" }
+
 [features]
 default = []
 libudev = ["mio-serial/libudev"]
