@@ -42,8 +42,8 @@ impl Fixture {
     #[cfg(unix)]
     pub async fn new(port_a: &'static str, port_b: &'static str) -> Self {
         let args = [
-            format!("PTY,link={}", port_a),
-            format!("PTY,link={}", port_b),
+            format!("PTY,link={port_a}"),
+            format!("PTY,link={port_b}"),
         ];
         log::trace!("starting process: socat {} {}", args[0], args[1]);
 

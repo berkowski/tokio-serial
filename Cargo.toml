@@ -10,22 +10,26 @@ documentation = "http://docs.rs/tokio-serial"
 readme = "README.md"
 keywords = ["rs232", "serial", "tokio"]
 categories = ["asynchronous", "hardware-support"]
-edition = "2018"
+edition = "2021"
 
 [package.metadata]
 msrv = "1.46.0"
+
+[patch.crates-io]
+mio-serial = { git = "https://github.com/barafael/mio-serial.git" }
 
 [features]
 default = []
 libudev = ["mio-serial/libudev"]
 rt = ["tokio/rt-multi-thread"]
 codec = ["tokio-util/codec", "bytes"]
+serde = ["mio-serial/serde"]
 
 [dependencies.futures]
 version = "0.3"
 
 [dependencies.tokio]
-version = "^1.8"
+version = "^1.37"
 default-features = false
 features = ["net"]
 
@@ -35,7 +39,7 @@ default-features = false
 optional = true
 
 [dependencies.mio-serial]
-version = "5.0.3"
+version = "5.0.5"
 default-features = false
 
 [dependencies.bytes]
@@ -50,12 +54,12 @@ version = "0.4"
 version = "1"
 
 [dev-dependencies.tokio]
-version = "^1.8"
+version = "^1.37"
 features = ["macros", "rt", "process", "time", "fs", "io-util"]
 default-features = false
 
 [dev-dependencies.env_logger]
-version = "0.10.0"
+version = "0.11"
 
 [[example]]
 name = "serial_println"
