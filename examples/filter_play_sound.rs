@@ -15,7 +15,7 @@ use tokio_util::codec::{Decoder, Encoder};
 extern crate anyhow;
 
 #[cfg(unix)]
-const DEFAULT_TTY: &str = "/dev/ttyACM0";
+const DEFAULT_TTY: &str = "/dev/ttyACM1";
 #[cfg(windows)]
 const DEFAULT_TTY: &str = "COM8";
 
