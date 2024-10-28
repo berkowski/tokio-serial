@@ -30,9 +30,14 @@ default-features = false
 features = ["net"]
 
 [dependencies.tokio-util]
-version = "0.7"
+version = "0.7.12"
 default-features = false
 optional = true
+
+[dev-dependencies.tokio-util]
+version = "0.7.12"
+default-features = false
+features = ["codec"]
 
 [dependencies.mio-serial]
 version = "5.0.3"
@@ -43,15 +48,32 @@ version = "1"
 default-features = false
 optional = true
 
+[dev-dependencies.bytes]
+version = "1"
+
+[dev-dependencies.cpal]
+version = "0.15.3"
+
 [dependencies.log]
 version = "0.4"
 
 [dependencies.cfg-if]
 version = "1"
 
+[dev-dependencies]
+anyhow = "1.0.91"
+
 [dev-dependencies.tokio]
 version = "^1.8"
-features = ["macros", "rt", "process", "time", "fs", "io-util"]
+features = [
+  "macros",
+  "rt",
+  "process",
+  "time",
+  "fs",
+  "io-util",
+  "rt-multi-thread",
+]
 default-features = false
 
 [dev-dependencies.env_logger]
