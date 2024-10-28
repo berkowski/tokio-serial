@@ -50,12 +50,14 @@ async fn main() -> tokio_serial::Result<()> {
     let mut args = env::args();
     let tty_path = args.nth(1).unwrap_or_else(|| DEFAULT_TTY.into());
 
-    let port = tokio_serial::new(tty_path, 115200).open_native_async()?;
 
+    #[cfg(unix)]
+    let mut port = tokio_serial::new(tty_path, 115200).open_native_async()?; // Mutable on Unix
+    #[cfg(windows)]
+    let port = tokio_serial::new(tty_path, 115200).open_native_async()?;      // Immutable on Windows
     #[cfg(unix)]
     port.set_exclusive(false)
         .expect("Unable to set serial port exclusive to false");
-
     let mut reader = LineCodec.framed(port);
 
     let find_text_map = create_find_text_map();
@@ -114,7 +116,6 @@ impl Encoder<String> for LineCodec {
 /// ///////////////////////////////
 use std::error::Error;
 use std::f32::consts::PI;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::collections::HashMap;
 
