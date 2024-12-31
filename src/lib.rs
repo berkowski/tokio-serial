@@ -45,7 +45,7 @@ pub type Result<T> = mio_serial::Result<T>;
 
 /// Async serial port I/O
 ///
-/// Reading and writing to a `TcpStream` is usually done using the
+/// Reading and writing to a `SerialStream` is usually done using the
 /// convenience methods found on the [`tokio::io::AsyncReadExt`] and [`tokio::io::AsyncWriteExt`]
 /// traits.
 ///
