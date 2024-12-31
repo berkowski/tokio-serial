@@ -29,7 +29,7 @@ impl Drop for Fixture {
             log::trace!("stopping socat process (id: {})...", id);
 
             self.process.start_kill().ok();
-            std::thread::sleep(Duration::from_millis(250));
+            std::thread::sleep(Duration::from_millis(1000));
             log::trace!("removing link: {}", self.port_a);
             std::fs::remove_file(self.port_a).ok();
             log::trace!("removing link: {}", self.port_b);
@@ -41,20 +41,22 @@ impl Drop for Fixture {
 impl Fixture {
     #[cfg(unix)]
     pub async fn new(port_a: &'static str, port_b: &'static str) -> Self {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static N: AtomicUsize = AtomicUsize::new(0);
+        let n = N.fetch_add(1, Ordering::Relaxed);
+        let port_a = format!("{}{}", port_a, n).leak();
+        let port_b = format!("{}{}", port_b, n).leak();
         let args = [
             format!("PTY,link={}", port_a),
             format!("PTY,link={}", port_b),
         ];
         log::trace!("starting process: socat {} {}", args[0], args[1]);
-
         let process = process::Command::new("socat")
             .args(&args)
             .spawn()
             .expect("unable to spawn socat process");
         log::trace!(".... done! (pid: {:?})", process.id().unwrap());
-
-        time::sleep(Duration::from_millis(500)).await;
-
+        time::sleep(Duration::from_millis(1000)).await;
         Self {
             process,
             port_a,

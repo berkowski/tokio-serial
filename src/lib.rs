@@ -103,12 +103,12 @@ impl SerialStream {
     ///
     /// ## Examples
     ///
-    /// ```rust
-    /// use tokio_serial::Serial;
+    /// ```no_run
+    /// use tokio_serial::SerialStream;
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let (master, slave) = Serial::pair().unwrap();
+    ///     let (master, slave) = SerialStream::pair().unwrap();
     /// }
     /// ```
     #[cfg(unix)]

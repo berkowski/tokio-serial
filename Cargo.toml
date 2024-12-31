@@ -1,6 +1,6 @@
 [package]
 name = "tokio-serial"
-version = "5.4.4"
+version = "5.4.5"
 authors = ["Zac Berkowitz <zac.berkowitz@gmail.com>"]
 description = "A serial port implementation for tokio"
 license = "MIT"
