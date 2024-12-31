@@ -22,7 +22,7 @@ use std::task::{Context, Poll};
 use std::time::Duration;
 
 #[cfg(feature = "codec")]
-mod frame;
+pub mod frame;
 
 #[cfg(unix)]
 mod os_prelude {
