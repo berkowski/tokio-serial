@@ -101,6 +101,16 @@ impl SerialStream {
     /// Attempting any IO or parameter settings on the slave tty after the master
     /// tty is closed will return errors.
     ///
+    /// ## Examples
+    ///
+    /// ```rust
+    /// use tokio_serial::Serial;
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let (master, slave) = Serial::pair().unwrap();
+    /// }
+    /// ```
     #[cfg(unix)]
     pub fn pair() -> crate::Result<(Self, Self)> {
         let (master, slave) = mio_serial::SerialStream::pair()?;
