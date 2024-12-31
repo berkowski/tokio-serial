@@ -14,8 +14,6 @@ pub use mio_serial::{
 };
 
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
-
-use std::convert::TryFrom;
 use std::io::{Read, Result as IoResult, Write};
 use std::pin::Pin;
 use std::task::{Context, Poll};
