@@ -27,7 +27,7 @@ pub mod frame;
 
 #[cfg(unix)]
 mod os_prelude {
-    pub use futures::ready;
+    pub use std::task::ready;
     pub use tokio::io::unix::AsyncFd;
 }
 

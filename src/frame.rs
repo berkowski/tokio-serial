@@ -4,14 +4,14 @@ use super::SerialStream;
 
 use tokio_util::codec::{Decoder, Encoder};
 
-use futures::{Sink, Stream};
+use futures_core::Stream;
+use futures_sink::Sink;
 use tokio::io::AsyncWrite;
 
 use bytes::BytesMut;
-use futures::ready;
 use std::io;
 use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::task::{ready, Context, Poll};
 
 /// A unified [`Stream`] and [`Sink`] interface to an underlying `SerialStream`, using
 /// the `Encoder` and `Decoder` traits to encode and decode frames.
