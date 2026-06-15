@@ -5,7 +5,7 @@
 /// Default settings for Nordic Thingy53, nrf5340dk, and other nordic devices (baud/com).
 use bytes::BytesMut;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use futures::stream::StreamExt;
+use futures_util::stream::StreamExt;
 use std::sync::Mutex;
 use std::sync::Arc;
 use std::{env, io, str};
