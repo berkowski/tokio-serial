@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.5.0] 2026-06-15
+
+### Added
+- `serde` feature, exposing the `Serialize`/`Deserialize` implementations from
+  `mio-serial`/`serialport` for the re-exported port configuration types
+  (`SerialPortBuilder`, `DataBits`, `Parity`, etc.).
+  [#80](https://github.com/berkowski/tokio-serial/pull/80) by
+  [@barafael](https://github.com/barafael).
+
+### Changed
+- `SerialFramed` now reads via `tokio_util::io::poll_read_buf` instead of a
+  hand-rolled `unsafe` read loop.
+  [#78](https://github.com/berkowski/tokio-serial/pull/78) by
+  [@paolobarbolini](https://github.com/paolobarbolini).
+- Replaced the `futures` dependency with the lighter `futures-core` and
+  `futures-sink`. No public API change: the implemented `Stream`/`Sink` traits
+  are the same re-exported traits.
+  [#81](https://github.com/berkowski/tokio-serial/pull/81) by
+  [@paolobarbolini](https://github.com/paolobarbolini), closes
+  [#73](https://github.com/berkowski/tokio-serial/issues/73).
+- Bumped the Minimum Supported Rust Version to `1.71.0`, matching the `tokio`
+  dependency (the previously documented `1.46.0` was no longer attainable).
+- Fixed compiler warnings on Windows.
+
 ## [5.4.2] 2022-03-04
 - merge [#48](https://github.com/berkowski/tokio-serial/pull/48)
 
