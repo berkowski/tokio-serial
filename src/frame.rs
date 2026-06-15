@@ -5,13 +5,13 @@ use super::SerialStream;
 use tokio_util::codec::{Decoder, Encoder};
 
 use futures::{Sink, Stream};
-use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
+use tokio::io::AsyncWrite;
 
-use bytes::{BufMut, BytesMut};
+use bytes::BytesMut;
 use futures::ready;
+use std::io;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use std::{io, mem::MaybeUninit};
 
 /// A unified [`Stream`] and [`Sink`] interface to an underlying `SerialStream`, using
 /// the `Encoder` and `Decoder` traits to encode and decode frames.
@@ -68,18 +68,11 @@ impl<C: Decoder + Unpin> Stream for SerialFramed<C> {
             }
 
             // We're out of data. Try and fetch more data to decode
-            unsafe {
-                // Convert `&mut [MaybeUnit<u8>]` to `&mut [u8]` because we will be
-                // writing to it via `poll_recv_from` and therefore initializing the memory.
-                let buf = &mut *(pin.rd.chunk_mut() as *mut _ as *mut [MaybeUninit<u8>]);
-                let mut read = ReadBuf::uninit(buf);
-                let ptr = read.filled().as_ptr();
-                ready!(Pin::new(&mut pin.port).poll_read(cx, &mut read))?;
-
-                assert_eq!(ptr, read.filled().as_ptr());
-                pin.rd.advance_mut(read.filled().len());
-            };
-
+            ready!(tokio_util::io::poll_read_buf(
+                Pin::new(&mut pin.port),
+                cx,
+                &mut pin.rd
+            ))?;
             pin.is_readable = true;
         }
     }

@@ -22,7 +22,7 @@ features = ["codec"]
 default = []
 libudev = ["mio-serial/libudev"]
 rt = ["tokio/rt-multi-thread"]
-codec = ["tokio-util/codec", "bytes"]
+codec = ["tokio-util/codec", "tokio-util/io", "bytes"]
 
 [dependencies.futures]
 version = "0.3"
